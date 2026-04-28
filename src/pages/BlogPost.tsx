@@ -1,6 +1,7 @@
 import { useParams, Link, Navigate } from 'react-router-dom'
 import { ArrowLeft, Clock, Calendar, ArrowRight } from 'lucide-react'
 import { getPostBySlug, BLOG_POSTS } from '../data/blogPosts'
+import SEOHead from '../components/SEOHead'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
@@ -18,6 +19,11 @@ export default function BlogPost() {
         <Navbar />
       </div>
 
+      <SEOHead
+        title={`${post.title} | ClearMed Imaging Solutions`}
+        description={post.excerpt.slice(0, 155)}
+        path={`/blog/${post.slug}`}
+      />
       <main style={{ paddingTop: '72px' }}>
         {/* Hero */}
         <div style={{ background: '#012854', padding: '3.5rem 1.5rem 4rem' }}>

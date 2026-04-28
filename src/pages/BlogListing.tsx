@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight, Clock } from 'lucide-react'
 import { BLOG_POSTS } from '../data/blogPosts'
+import SEOHead from '../components/SEOHead'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
@@ -11,6 +12,11 @@ export default function BlogListing() {
         <Navbar />
       </div>
 
+      <SEOHead
+        title="Resource Library | ClearMed Imaging Solutions"
+        description="In-depth guides on CT and MRI service, maintenance, installation, parts, and contract pricing — written for imaging directors and hospital administrators."
+        path="/blog"
+      />
       <main style={{ paddingTop: '72px' }}>
         {/* Hero */}
         <div style={{ background: '#012854', padding: '4rem 1.5rem 3.5rem' }}>
