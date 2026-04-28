@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="939" height="363" viewBox="0 0 939 363" role="img" aria-label="ClearMed Imaging Solutions logo">
+  <defs>
+    <linearGradient id="dividerGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#274193"/>
+      <stop offset="100%" stop-color="#00AEEF"/>
+    </linearGradient>
+    <style>
+      .blue { fill: #245AA8; }
+      .navy { fill: #2C4AA3; }
+      .cyan { fill: #1FA6E7; }
+      .subtitle { fill: #245AA8; font-family: Arial, Helvetica, sans-serif; font-size: 48px; letter-spacing: 6px; font-weight: 500; }
+      .title { font-family: Arial, Helvetica, sans-serif; font-size: 142px; font-weight: 500; }
+    </style>
+  </defs>
+  <rect width="939" height="363" fill="#ffffff"/>
+  <!-- Dot mark -->
+  <g class="blue">
+    <!-- column 1 -->
+    <circle cx="14.5" cy="154" r="6.5"/>
+    <circle cx="14.5" cy="208.5" r="6.5"/>
+    <!-- column 2 -->
+    <circle cx="44.5" cy="99.5" r="12.5"/>
+    <circle cx="44.5" cy="154" r="12.5"/>
+    <circle cx="44.5" cy="208.5" r="12.5"/>
+    <circle cx="44.5" cy="263" r="12.5"/>
+    <!-- column 3 -->
+    <circle cx="99" cy="70" r="7"/>
+    <circle cx="99" cy="99.5" r="12.5"/>
+    <circle cx="99" cy="151" r="22"/>
+    <circle cx="99" cy="211" r="22"/>
+    <circle cx="99" cy="263" r="13"/>
+    <circle cx="99" cy="293" r="7"/>
+    <!-- column 4 -->
+    <circle cx="153.5" cy="70" r="7"/>
+    <circle cx="153.5" cy="99.5" r="12.5"/>
+    <circle cx="153.5" cy="151" r="22"/>
+    <circle cx="153.5" cy="211" r="22"/>
+    <circle cx="153.5" cy="263" r="13"/>
+    <circle cx="153.5" cy="293" r="7"/>
+    <!-- column 5 -->
+    <circle cx="208" cy="99.5" r="12.5"/>
+    <circle cx="208" cy="154" r="12.5"/>
+    <circle cx="208" cy="208.5" r="12.5"/>
+    <circle cx="208" cy="263" r="12.5"/>
+    <!-- column 6 -->
+    <circle cx="238.5" cy="154" r="6.5"/>
+    <circle cx="238.5" cy="208.5" r="6.5"/>
+  </g>
+  <!-- Divider -->
+  <rect x="291" y="3" width="8" height="356" fill="url(#dividerGrad)"/>
+  <!-- Wordmark -->
+  <text x="331" y="193" class="title">
+    <tspan class="navy">Clear</tspan><tspan class="cyan">Med</tspan>
+  </text>
+  <text x="331" y="276" class="subtitle">IMAGING SOLUTIONS</text>
+</svg>
