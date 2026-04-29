@@ -22,7 +22,24 @@ export default function HeroSection() {
         overflow: 'hidden',
       }}
     >
-      {/* Background image */}
+      {/* Background video */}
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          objectPosition: 'center',
+        }}
+      >
+        <source src="/images/Siemens_CT_motion.mp4" type="video/mp4" />
+      </video>
+      {/* Fallback for browsers with no video support */}
       <div
         style={{
           position: 'absolute',
@@ -30,7 +47,7 @@ export default function HeroSection() {
           backgroundImage: 'url(/images/mri-aera-room.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
+          pointerEvents: 'none',
         }}
       />
       {/* Gradient overlay */}

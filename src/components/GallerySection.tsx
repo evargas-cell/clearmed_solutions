@@ -1,3 +1,6 @@
+import { useState } from 'react'
+import Lightbox from './Lightbox'
+
 const GALLERY = [
   {
     src: '/images/mri-aera-installed.jpg',
@@ -38,8 +41,19 @@ const GALLERY = [
 ]
 
 export default function GallerySection() {
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+
   return (
     <section id="gallery" style={{ background: '#f8fafc', padding: '5rem 0' }}>
+      {lightboxIndex !== null && (
+        <Lightbox
+          items={GALLERY}
+          index={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+          onPrev={() => setLightboxIndex(i => Math.max(0, (i ?? 0) - 1))}
+          onNext={() => setLightboxIndex(i => Math.min(GALLERY.length - 1, (i ?? 0) + 1))}
+        />
+      )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
@@ -66,7 +80,12 @@ export default function GallerySection() {
             <div
               key={i}
               className="group relative rounded-2xl overflow-hidden"
-              style={{ boxShadow: '0 2px 8px rgba(1,40,84,0.08), 0 8px 24px rgba(1,40,84,0.12)' }}
+              style={{ boxShadow: '0 2px 8px rgba(1,40,84,0.08), 0 8px 24px rgba(1,40,84,0.12)', cursor: 'pointer' }}
+              onClick={() => setLightboxIndex(i)}
+              role="button"
+              tabIndex={0}
+              aria-label={`Open ${item.caption}`}
+              onKeyDown={e => e.key === 'Enter' && setLightboxIndex(i)}
             >
               <img
                 src={item.src}

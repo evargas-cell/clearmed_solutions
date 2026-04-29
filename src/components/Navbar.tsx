@@ -19,6 +19,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [servicesOpen, setServicesOpen] = useState(false)
   const [equipmentOpen, setEquipmentOpen] = useState(false)
+  const [activeSection, setActiveSection] = useState('')
   const servicesRef = useRef<HTMLDivElement>(null)
   const equipmentRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
@@ -26,10 +27,23 @@ export default function Navbar() {
   const isHome = location.pathname === '/'
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24)
+    const onScroll = () => {
+      setScrolled(window.scrollY > 24)
+      if (!isHome) return
+      const ordered = ['contact', 'about', 'gallery', 'equipment', 'services']
+      let found = ''
+      for (const id of ordered) {
+        const el = document.getElementById(id)
+        if (el && el.getBoundingClientRect().top <= window.innerHeight * 0.55) {
+          found = id
+          break
+        }
+      }
+      setActiveSection(found)
+    }
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  }, [isHome])
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -177,14 +191,14 @@ export default function Navbar() {
             {/* Desktop Nav */}
             <div className="hidden lg:flex items-center" style={{ gap: '0.15rem' }}>
 
-              <button className="nav-link" onClick={() => scrollTo('#')}>
+              <button className={`nav-link${isHome && !activeSection ? ' active' : ''}`} onClick={() => scrollTo('#')}>
                 Home
               </button>
 
               {/* Services Dropdown */}
               <div ref={servicesRef} style={{ position: 'relative' }}>
                 <button
-                  className="nav-link"
+                  className={`nav-link${activeSection === 'services' ? ' active' : ''}`}
                   onClick={() => { setServicesOpen(!servicesOpen); setEquipmentOpen(false) }}
                   aria-expanded={servicesOpen}
                 >
@@ -229,7 +243,7 @@ export default function Navbar() {
               {/* Equipment Dropdown */}
               <div ref={equipmentRef} style={{ position: 'relative' }}>
                 <button
-                  className="nav-link"
+                  className={`nav-link${activeSection === 'equipment' ? ' active' : ''}`}
                   onClick={() => { setEquipmentOpen(!equipmentOpen); setServicesOpen(false) }}
                   aria-expanded={equipmentOpen}
                 >
@@ -271,18 +285,19 @@ export default function Navbar() {
                 </div>
               </div>
 
-              {['Our Work|#gallery', 'About|#about', 'Contact|#contact'].map(item => {
-                const [label, href] = item.split('|')
-                return (
-                  <button
-                    key={label}
-                    className="nav-link"
-                    onClick={() => scrollTo(href)}
-                  >
-                    {label}
-                  </button>
-                )
-              })}
+              {[
+                { label: 'Our Work', href: '#gallery', section: 'gallery' },
+                { label: 'About', href: '#about', section: 'about' },
+                { label: 'Contact', href: '#contact', section: 'contact' },
+              ].map(({ label, href, section }) => (
+                <button
+                  key={label}
+                  className={`nav-link${activeSection === section ? ' active' : ''}`}
+                  onClick={() => scrollTo(href)}
+                >
+                  {label}
+                </button>
+              ))}
 
               <button
                 className="nav-link"

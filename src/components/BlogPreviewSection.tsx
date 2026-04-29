@@ -1,10 +1,14 @@
+import React from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Clock } from 'lucide-react'
 import { BLOG_POSTS } from '../data/blogPosts'
+import { useInView } from '../hooks/useInView'
 
 const PREVIEW = BLOG_POSTS.slice(0, 3)
 
 export default function BlogPreviewSection() {
+  const { ref, inView } = useInView(0.1)
+
   return (
     <section style={{ background: '#ffffff', padding: '5rem 0' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -85,14 +89,15 @@ export default function BlogPreviewSection() {
 
         {/* Cards */}
         <div
+          ref={ref as React.RefObject<HTMLDivElement>}
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
             gap: '1.75rem',
           }}
         >
-          {PREVIEW.map(post => (
-            <Link key={post.slug} to={`/blog/${post.slug}`} style={{ textDecoration: 'none' }}>
+          {PREVIEW.map((post, i) => (
+            <Link key={post.slug} to={`/blog/${post.slug}`} style={{ textDecoration: 'none', opacity: inView ? 1 : 0, translate: inView ? '0 0' : '0 28px', transition: `opacity 0.6s ease ${i * 0.1}s, translate 0.6s cubic-bezier(0.16,1,0.3,1) ${i * 0.1}s` }}>
               <article
                 style={{
                   background: '#f8fafc',

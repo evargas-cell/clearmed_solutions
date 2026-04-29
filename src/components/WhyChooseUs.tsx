@@ -1,4 +1,6 @@
+import React, { useEffect, useRef, useState } from 'react'
 import { Award, Clock, FileText } from 'lucide-react'
+import { useInView } from '../hooks/useInView'
 
 const FEATURES = [
   {
@@ -36,6 +38,64 @@ const STATS = [
   { value: '100%', label: 'OEM-Certified' },
   { value: '24/7', label: 'Emergency Support' },
 ]
+
+function parseStat(value: string) {
+  const m = value.match(/^(\d+)([+%]?)$/)
+  if (!m) return null
+  return { num: parseInt(m[1]), suffix: m[2] }
+}
+
+function AnimatedCounter({ value, label }: { value: string; label: string }) {
+  const { ref, inView } = useInView(0.3)
+  const [count, setCount] = useState(0)
+  const started = useRef(false)
+  const parsed = parseStat(value)
+
+  useEffect(() => {
+    if (!inView || started.current || !parsed) return
+    started.current = true
+    const { num } = parsed
+    const duration = 1800
+    const start = performance.now()
+    const tick = (now: number) => {
+      const p = Math.min((now - start) / duration, 1)
+      const eased = 1 - Math.pow(1 - p, 3)
+      setCount(Math.round(eased * num))
+      if (p < 1) requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
+  }, [inView])
+
+  const display = parsed ? `${count}${parsed.suffix}` : value
+
+  return (
+    <div ref={ref as React.RefObject<HTMLDivElement>} style={{ textAlign: 'center' }}>
+      <div
+        style={{
+          fontFamily: 'Montserrat, sans-serif',
+          fontWeight: 900,
+          fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
+          color: '#009fc1',
+          lineHeight: 1,
+          marginBottom: '0.35rem',
+        }}
+      >
+        {display}
+      </div>
+      <div
+        style={{
+          fontFamily: 'Open Sans, sans-serif',
+          fontSize: '0.8rem',
+          color: 'rgba(255,255,255,0.65)',
+          fontWeight: 600,
+          letterSpacing: '0.04em',
+        }}
+      >
+        {label}
+      </div>
+    </div>
+  )
+}
 
 export default function WhyChooseUs() {
   return (
@@ -207,31 +267,7 @@ export default function WhyChooseUs() {
         }}
       >
         {STATS.map(s => (
-          <div key={s.value} style={{ textAlign: 'center' }}>
-            <div
-              style={{
-                fontFamily: 'Montserrat, sans-serif',
-                fontWeight: 900,
-                fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
-                color: '#009fc1',
-                lineHeight: 1,
-                marginBottom: '0.35rem',
-              }}
-            >
-              {s.value}
-            </div>
-            <div
-              style={{
-                fontFamily: 'Open Sans, sans-serif',
-                fontSize: '0.8rem',
-                color: 'rgba(255,255,255,0.65)',
-                fontWeight: 600,
-                letterSpacing: '0.04em',
-              }}
-            >
-              {s.label}
-            </div>
-          </div>
+          <AnimatedCounter key={s.value} value={s.value} label={s.label} />
         ))}
       </div>
     </>

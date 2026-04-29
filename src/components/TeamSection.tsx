@@ -1,3 +1,6 @@
+import React from 'react'
+import { useInView } from '../hooks/useInView'
+
 const FOUNDERS = [
   {
     name: 'Eyad Albakri',
@@ -14,6 +17,8 @@ const FOUNDERS = [
 ]
 
 export default function TeamSection() {
+  const { ref, inView } = useInView(0.1)
+
   return (
     <section id="about" style={{ background: '#f8fafc', padding: '5rem 0' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -64,6 +69,7 @@ export default function TeamSection() {
 
         {/* Founder cards */}
         <div
+          ref={ref as React.RefObject<HTMLDivElement>}
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
@@ -72,7 +78,7 @@ export default function TeamSection() {
             margin: '0 auto',
           }}
         >
-          {FOUNDERS.map(founder => (
+          {FOUNDERS.map((founder, i) => (
             <div
               key={founder.name}
               style={{
@@ -85,6 +91,9 @@ export default function TeamSection() {
                 alignItems: 'center',
                 padding: '2.5rem 2rem 2rem',
                 textAlign: 'center',
+                opacity: inView ? 1 : 0,
+                translate: inView ? '0 0' : '0 32px',
+                transition: `opacity 0.7s ease ${i * 0.15}s, translate 0.7s cubic-bezier(0.16,1,0.3,1) ${i * 0.15}s`,
               }}
             >
               {/* Photo */}

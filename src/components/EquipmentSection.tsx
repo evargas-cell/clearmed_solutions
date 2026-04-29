@@ -159,7 +159,7 @@ export default function EquipmentSection() {
         {/* Content: two columns */}
         <div
           key={tab.id}
-          className="animate-fadeIn"
+          className="animate-tabIn"
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',

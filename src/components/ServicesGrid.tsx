@@ -1,4 +1,6 @@
+import React from 'react'
 import { Zap, Activity, Scan, Brain } from 'lucide-react'
+import { useInView } from '../hooks/useInView'
 
 const CARDS = [
   {
@@ -44,6 +46,8 @@ const CARDS = [
 ]
 
 export default function ServicesGrid() {
+  const { ref, inView } = useInView(0.1)
+
   return (
     <section id="services" style={{ background: '#fff', padding: '5rem 0' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -94,13 +98,14 @@ export default function ServicesGrid() {
 
         {/* Cards grid */}
         <div
+          ref={ref as React.RefObject<HTMLDivElement>}
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
             gap: '1.25rem',
           }}
         >
-          {CARDS.map(card => {
+          {CARDS.map((card, i) => {
             const Icon = card.Icon
             return (
               <div
@@ -112,8 +117,10 @@ export default function ServicesGrid() {
                   padding: '1.75rem',
                   border: `1px solid ${card.color}20`,
                   boxShadow: '0 1px 2px rgba(1,40,84,0.04), 0 2px 8px rgba(1,40,84,0.06)',
-                  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                  transition: `transform 0.2s ease, box-shadow 0.2s ease, opacity 0.6s ease ${i * 0.1}s, translate 0.6s ease ${i * 0.1}s`,
                   cursor: 'default',
+                  opacity: inView ? 1 : 0,
+                  translate: inView ? '0 0' : '0 28px',
                 }}
                 onMouseEnter={e => {
                   const el = e.currentTarget
