@@ -1,3 +1,72 @@
+import { useEffect, useRef, useState } from 'react'
+
+function parseStat(value: string) {
+  const m = value.match(/^(\d+)([+%]?)$/)
+  if (!m) return null
+  return { num: parseInt(m[1]), suffix: m[2] }
+}
+
+function HeroStat({ value, label, startDelay }: { value: string; label: string; startDelay: number }) {
+  const [count, setCount] = useState(0)
+  const started = useRef(false)
+  const parsed = parseStat(value)
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (started.current || !parsed) return
+      started.current = true
+      const { num } = parsed
+      const duration = 1600
+      const start = performance.now()
+      const tick = (now: number) => {
+        const p = Math.min((now - start) / duration, 1)
+        const eased = 1 - Math.pow(1 - p, 3)
+        setCount(Math.round(eased * num))
+        if (p < 1) requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+    }, startDelay)
+    return () => clearTimeout(t)
+  }, [])
+
+  const display = parsed ? `${count}${parsed.suffix}` : value
+
+  return (
+    <div
+      style={{
+        background: 'rgba(1,40,84,0.55)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: '12px',
+        padding: '1rem 1.25rem',
+        backdropFilter: 'blur(8px)',
+      }}
+    >
+      <div
+        style={{
+          fontFamily: 'Montserrat, sans-serif',
+          fontWeight: 900,
+          fontSize: 'clamp(1.75rem, 3vw, 2.25rem)',
+          color: '#009fc1',
+          lineHeight: 1,
+          marginBottom: '0.25rem',
+        }}
+      >
+        {display}
+      </div>
+      <div
+        style={{
+          fontFamily: 'Open Sans, sans-serif',
+          fontSize: '0.8rem',
+          color: 'rgba(255,255,255,0.7)',
+          fontWeight: 600,
+        }}
+      >
+        {label}
+      </div>
+    </div>
+  )
+}
+
 export default function HeroSection() {
   const scrollTo = (href: string) => {
     const el = document.querySelector(href)
@@ -130,39 +199,12 @@ export default function HeroSection() {
             }}
           >
             {stats.map((stat, i) => (
-              <div
+              <HeroStat
                 key={i}
-                style={{
-                  background: 'rgba(1,40,84,0.55)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '12px',
-                  padding: '1rem 1.25rem',
-                  backdropFilter: 'blur(8px)',
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: 'Montserrat, sans-serif',
-                    fontWeight: 900,
-                    fontSize: 'clamp(1.75rem, 3vw, 2.25rem)',
-                    color: '#009fc1',
-                    lineHeight: 1,
-                    marginBottom: '0.25rem',
-                  }}
-                >
-                  {stat.value}
-                </div>
-                <div
-                  style={{
-                    fontFamily: 'Open Sans, sans-serif',
-                    fontSize: '0.8rem',
-                    color: 'rgba(255,255,255,0.7)',
-                    fontWeight: 600,
-                  }}
-                >
-                  {stat.label}
-                </div>
-              </div>
+                value={stat.value}
+                label={stat.label}
+                startDelay={800 + i * 120}
+              />
             ))}
           </div>
 

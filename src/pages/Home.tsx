@@ -1,7 +1,6 @@
 import SEOHead from '../components/SEOHead'
 import Navbar from '../components/Navbar'
 import HeroSection from '../components/HeroSection'
-import BrandsBanner from '../components/BrandsBanner'
 import ServicesGrid from '../components/ServicesGrid'
 import SolutionsHub from '../components/SolutionsHub'
 import WhyChooseUs from '../components/WhyChooseUs'
@@ -26,7 +25,6 @@ export default function Home() {
       </div>
       <main>
         <HeroSection />
-        <BrandsBanner />
         <ServicesGrid />
         <SolutionsHub />
         <WhyChooseUs />

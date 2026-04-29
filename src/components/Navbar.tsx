@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Menu, X, ChevronDown } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import LogoSVG from './LogoSVG'
 
 const SERVICES = [
   { label: 'Siemens CT Service', href: '#siemens-ct' },
@@ -176,16 +177,7 @@ export default function Navbar() {
               }}
               aria-label="ClearMed Imaging Solutions – go to top"
             >
-              <img
-                src="/images/logo.svg"
-                alt="ClearMed Imaging Solutions"
-                style={{
-                  height: '52px',
-                  width: 'auto',
-                  display: 'block',
-                }}
-                draggable={false}
-              />
+              <LogoSVG height={52} />
             </button>
 
             {/* Desktop Nav */}
