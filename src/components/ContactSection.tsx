@@ -35,16 +35,11 @@ export default function ContactSection() {
     e.preventDefault()
     setError(false)
 
-    if (import.meta.env.DEV) {
-      setSubmitted(true)
-      return
-    }
-
     try {
-      const res = await fetch('/', {
+      const res = await fetch('/.netlify/functions/submit-form', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: encode({ 'form-name': 'contact', ...(form as unknown as Record<string, string>) }),
+        body: encode(form as unknown as Record<string, string>),
       })
       if (res.ok) {
         setSubmitted(true)
@@ -121,8 +116,7 @@ export default function ContactSection() {
                     Something went wrong. Please try again or email us directly at support@clearmedimaging.com
                   </div>
                 ) : null}
-                <form onSubmit={submit} name="contact" data-netlify="true" className="space-y-5">
-                <input type="hidden" name="form-name" value="contact" />
+                <form onSubmit={submit} className="space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-sm font-semibold mb-1.5" style={{ color: '#374151', fontFamily: 'Montserrat, sans-serif' }}>
