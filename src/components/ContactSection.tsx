@@ -24,9 +24,30 @@ export default function ContactSection() {
   const handle = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
 
-  const submit = (e: React.FormEvent) => {
+  const [error, setError] = useState(false)
+
+  const encode = (data: Record<string, string>) =>
+    Object.entries(data)
+      .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+      .join('&')
+
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSubmitted(true)
+    setError(false)
+    try {
+      const res = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: encode({ 'form-name': 'contact', ...form }),
+      })
+      if (res.ok) {
+        setSubmitted(true)
+      } else {
+        setError(true)
+      }
+    } catch {
+      setError(true)
+    }
   }
 
   const inputClass = `
@@ -88,7 +109,13 @@ export default function ContactSection() {
                 </button>
               </div>
             ) : (
-              <form onSubmit={submit} className="space-y-5">
+              {error && (
+                <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '12px', padding: '1rem', marginBottom: '1rem', color: '#dc2626', fontFamily: 'Open Sans, sans-serif', fontSize: '0.875rem' }}>
+                  Something went wrong. Please try again or email us directly at support@clearmedimaging.com
+                </div>
+              )}
+              <form onSubmit={submit} name="contact" data-netlify="true" className="space-y-5">
+                <input type="hidden" name="form-name" value="contact" />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-sm font-semibold mb-1.5" style={{ color: '#374151', fontFamily: 'Montserrat, sans-serif' }}>
