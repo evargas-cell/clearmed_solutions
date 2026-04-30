@@ -38,14 +38,14 @@ export default function ContactSection() {
       const res = await fetch('/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: encode({ 'form-name': 'contact', ...form }),
+        body: encode({ 'form-name': 'contact', ...(form as unknown as Record<string, string>) }),
       })
       if (res.ok) {
         setSubmitted(true)
       } else {
         setError(true)
       }
-    } catch {
+    } catch (_err) {
       setError(true)
     }
   }
@@ -109,12 +109,13 @@ export default function ContactSection() {
                 </button>
               </div>
             ) : (
-              {error && (
-                <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '12px', padding: '1rem', marginBottom: '1rem', color: '#dc2626', fontFamily: 'Open Sans, sans-serif', fontSize: '0.875rem' }}>
-                  Something went wrong. Please try again or email us directly at support@clearmedimaging.com
-                </div>
-              )}
-              <form onSubmit={submit} name="contact" data-netlify="true" className="space-y-5">
+              <>
+                {error ? (
+                  <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '12px', padding: '1rem', marginBottom: '1rem', color: '#dc2626', fontFamily: 'Open Sans, sans-serif', fontSize: '0.875rem' }}>
+                    Something went wrong. Please try again or email us directly at support@clearmedimaging.com
+                  </div>
+                ) : null}
+                <form onSubmit={submit} name="contact" data-netlify="true" className="space-y-5">
                 <input type="hidden" name="form-name" value="contact" />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
@@ -277,6 +278,7 @@ export default function ContactSection() {
                   Submit Request <ArrowRight size={16} />
                 </button>
               </form>
+              </>
             )}
           </div>
 

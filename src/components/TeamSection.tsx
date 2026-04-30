@@ -7,12 +7,14 @@ const FOUNDERS = [
     title: 'Co-Founder',
     bio: 'With over two decades of hands-on experience servicing Siemens and GE imaging systems, Eyad brings deep OEM-level expertise to every engagement. His technical background and commitment to uptime have shaped ClearMed\'s reputation for reliable, precision service across the Southeast.',
     image: '/images/Eyad.png',
+    objectPosition: 'center 12%',
   },
   {
     name: 'Ankur Patel',
     title: 'Co-Founder',
     bio: 'Ankur combines extensive field experience in medical imaging installation and maintenance with a strong focus on client relationships and operational excellence. He leads ClearMed\'s service strategy, ensuring facilities receive responsive, high-quality support when it matters most.',
     image: '/images/Ankur.png',
+    objectPosition: 'center 10%',
   },
 ]
 
@@ -99,12 +101,12 @@ export default function TeamSection() {
               {/* Photo */}
               <div
                 style={{
-                  width: '140px',
-                  height: '140px',
+                  width: '200px',
+                  height: '200px',
                   borderRadius: '50%',
                   overflow: 'hidden',
                   marginBottom: '1.5rem',
-                  boxShadow: '0 4px 16px rgba(1,40,84,0.15), 0 0 0 4px rgba(0,159,193,0.15)',
+                  boxShadow: '0 4px 24px rgba(1,40,84,0.18), 0 0 0 4px rgba(0,159,193,0.18)',
                   flexShrink: 0,
                 }}
               >
@@ -115,8 +117,9 @@ export default function TeamSection() {
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover',
-                    objectPosition: 'center top',
+                    objectPosition: founder.objectPosition,
                     display: 'block',
+                    imageRendering: 'auto',
                   }}
                 />
               </div>
