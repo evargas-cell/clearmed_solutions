@@ -34,6 +34,12 @@ export default function ContactSection() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(false)
+
+    if (import.meta.env.DEV) {
+      setSubmitted(true)
+      return
+    }
+
     try {
       const res = await fetch('/', {
         method: 'POST',
