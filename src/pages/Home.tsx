@@ -16,7 +16,7 @@ export default function Home() {
   return (
     <div style={{ width: '100%', minHeight: '100vh' }}>
       <SEOHead
-        title="ClearMed Imaging Solutions | CT & MRI Service, Installation & Maintenance"
+        title="ClearMed Imaging Solutions"
         description="OEM-certified service, installation, and preventive maintenance for Siemens and GE CT and MRI imaging systems across the Southeast."
         path="/"
       />
