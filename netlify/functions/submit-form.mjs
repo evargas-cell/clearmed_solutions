@@ -2,6 +2,11 @@ const TEAM_EMAIL = 'support@clearmedimaging.com'
 const FROM_NOREPLY = 'ClearMed Imaging Solutions <noreply@clearmedimaging.com>'
 const AIRTABLE_TABLE = 'Leads'
 
+// Minimum seconds a real person needs to fill the form. Bots submit instantly.
+const MIN_FILL_SECONDS = 3
+// A legitimate service request almost never contains this many links.
+const MAX_LINKS = 3
+
 export const handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' }
@@ -19,17 +24,94 @@ export const handler = async (event) => {
     message:       params.get('message')      || '',
   }
 
+  const ip = event.headers['x-nf-client-connection-ip'] || event.headers['client-ip'] || ''
+
+  // ── Layer 1: honeypot, timing and content heuristics ────────────────────────
+  // These are silently dropped: the bot gets a 200 and never learns it was
+  // filtered, so it has no signal to adapt against.
+  const trap = params.get('website') || ''
+  const elapsedMs = Number(params.get('elapsed') || 0)
+  const linkCount = (`${f.message} ${f.organization}`.match(/https?:\/\/|www\./gi) || []).length
+
+  let dropReason = ''
+  if (trap.trim()) dropReason = 'honeypot'
+  else if (elapsedMs > 0 && elapsedMs < MIN_FILL_SECONDS * 1000) dropReason = 'too-fast'
+  else if (linkCount > MAX_LINKS) dropReason = 'link-spam'
+  else if (!f.email.includes('@')) dropReason = 'invalid-email'
+
+  if (dropReason) {
+    console.warn(`SPAM BLOCKED (${dropReason}) ip=${ip} email=${f.email}`)
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ok: true, errors: [] }),
+    }
+  }
+
+  // ── Layer 2: Cloudflare Turnstile ───────────────────────────────────────────
+  const secret = process.env.TURNSTILE_SECRET_KEY
+  if (secret) {
+    const token = params.get('cf-turnstile-response') || ''
+    const passed = await verifyTurnstile(secret, token, ip)
+    if (!passed) {
+      console.warn(`SPAM BLOCKED (turnstile) ip=${ip} email=${f.email}`)
+      return {
+        statusCode: 403,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ok: false, error: 'verification-failed' }),
+      }
+    }
+  } else {
+    console.warn('TURNSTILE_SECRET_KEY not set — CAPTCHA verification skipped.')
+  }
+
+  // ── Deliver ─────────────────────────────────────────────────────────────────
+  const safe = escapeFields(f)
   const errs = []
 
   await saveToAirtable(f).catch(e => { console.error('Airtable:', e); errs.push('airtable') })
-  await sendEmail(TEAM_EMAIL, teamSubject(f), teamHtml(f)).catch(e => { console.error('Team email:', e); errs.push('team-email') })
-  await sendEmail(f.email, clientSubject(), clientHtml(f)).catch(e => { console.error('Client email:', e); errs.push('client-email') })
+  await sendEmail(TEAM_EMAIL, teamSubject(safe), teamHtml(safe)).catch(e => { console.error('Team email:', e); errs.push('team-email') })
+  await sendEmail(f.email, clientSubject(), clientHtml(safe)).catch(e => { console.error('Client email:', e); errs.push('client-email') })
 
   return {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ ok: true, errors: errs }),
   }
+}
+
+// ── Turnstile verification ────────────────────────────────────────────────────
+
+async function verifyTurnstile(secret, token, ip) {
+  if (!token) return false
+  try {
+    const body = new URLSearchParams({ secret, response: token })
+    if (ip) body.set('remoteip', ip)
+
+    const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString(),
+    })
+    const data = await res.json()
+    if (!data.success) console.warn('Turnstile rejected:', data['error-codes'])
+    return data.success === true
+  } catch (e) {
+    console.error('Turnstile verify failed:', e)
+    // Cloudflare unreachable — fail closed so an outage can't become an open door.
+    return false
+  }
+}
+
+// Submitted text lands inside HTML emails; neutralize it so a spammer can't
+// inject markup or links into the team's inbox.
+function escapeFields(f) {
+  const esc = (s) => String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+  return Object.fromEntries(Object.entries(f).map(([k, v]) => [k, esc(v)]))
 }
 
 // ── Airtable ──────────────────────────────────────────────────────────────────

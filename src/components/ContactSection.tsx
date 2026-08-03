@@ -1,5 +1,8 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Mail, MapPin, Clock, CheckCircle, ArrowRight } from 'lucide-react'
+import Turnstile from './Turnstile'
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined
 
 interface FormData {
   firstName: string
@@ -25,6 +28,16 @@ export default function ContactSection() {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
 
   const [error, setError] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
+  const [sending, setSending] = useState(false)
+
+  // ── Spam defenses ───────────────────────────────────────────────────────────
+  const [captchaToken, setCaptchaToken] = useState('')
+  const [captchaNonce, setCaptchaNonce] = useState(0)
+  // Honeypot: hidden from real users, irresistible to naive bots.
+  const [website, setWebsite] = useState('')
+  // Bots fill and submit near-instantly; humans do not.
+  const openedAt = useRef(Date.now())
 
   const encode = (data: Record<string, string>) =>
     Object.entries(data)
@@ -34,21 +47,49 @@ export default function ContactSection() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(false)
+    setErrorMsg('')
 
+    if (TURNSTILE_SITE_KEY && !captchaToken) {
+      setError(true)
+      setErrorMsg('Please complete the "I\'m not a robot" verification below before submitting.')
+      return
+    }
+
+    setSending(true)
     try {
       const res = await fetch('/.netlify/functions/submit-form', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: encode(form as unknown as Record<string, string>),
+        body: encode({
+          ...(form as unknown as Record<string, string>),
+          'cf-turnstile-response': captchaToken,
+          website,
+          elapsed: String(Date.now() - openedAt.current),
+        }),
       })
       if (res.ok) {
         setSubmitted(true)
       } else {
         setError(true)
+        setCaptchaToken('')
+        setCaptchaNonce(n => n + 1)
       }
     } catch (_err) {
       setError(true)
+      setCaptchaToken('')
+      setCaptchaNonce(n => n + 1)
+    } finally {
+      setSending(false)
     }
+  }
+
+  const resetForm = () => {
+    setSubmitted(false)
+    setForm(INITIAL)
+    setWebsite('')
+    setCaptchaToken('')
+    setCaptchaNonce(n => n + 1)
+    openedAt.current = Date.now()
   }
 
   const inputClass = `
@@ -102,7 +143,7 @@ export default function ContactSection() {
                   Your request has been received. A ClearMed specialist will contact you within one business day.
                 </p>
                 <button
-                  onClick={() => { setSubmitted(false); setForm(INITIAL) }}
+                  onClick={resetForm}
                   className="btn-sky mt-6"
                   style={{ fontSize: '0.85rem' }}
                 >
@@ -113,7 +154,7 @@ export default function ContactSection() {
               <>
                 {error ? (
                   <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '12px', padding: '1rem', marginBottom: '1rem', color: '#dc2626', fontFamily: 'Open Sans, sans-serif', fontSize: '0.875rem' }}>
-                    Something went wrong. Please try again or email us directly at support@clearmedimaging.com
+                    {errorMsg || 'Something went wrong. Please try again or email us directly at support@clearmedimaging.com'}
                   </div>
                 ) : null}
                 <form onSubmit={submit} className="space-y-5">
@@ -274,8 +315,47 @@ export default function ContactSection() {
                   />
                 </div>
 
-                <button type="submit" className="btn-amber flex items-center gap-2 w-full justify-center">
-                  Submit Request <ArrowRight size={16} />
+                {/* Honeypot — hidden from humans, off-screen rather than display:none
+                    so bots that skip hidden inputs still see it. */}
+                <div
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    left: '-9999px',
+                    width: '1px',
+                    height: '1px',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <label htmlFor="website-url">Do not fill this out</label>
+                  <input
+                    id="website-url"
+                    type="text"
+                    name="website"
+                    value={website}
+                    onChange={e => setWebsite(e.target.value)}
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
+                </div>
+
+                {TURNSTILE_SITE_KEY ? (
+                  <div>
+                    <Turnstile
+                      siteKey={TURNSTILE_SITE_KEY}
+                      onVerify={setCaptchaToken}
+                      resetKey={captchaNonce}
+                    />
+                  </div>
+                ) : null}
+
+                <button
+                  type="submit"
+                  disabled={sending}
+                  className="btn-amber flex items-center gap-2 w-full justify-center"
+                  style={{ opacity: sending ? 0.7 : 1, cursor: sending ? 'wait' : 'pointer' }}
+                >
+                  {sending ? 'Sending…' : <>Submit Request <ArrowRight size={16} /></>}
                 </button>
               </form>
               </>
