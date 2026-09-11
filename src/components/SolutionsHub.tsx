@@ -80,6 +80,30 @@ export default function SolutionsHub() {
   const lastProgressRef = useRef<number>(-1)
   const [activePanel, setActivePanel] = useState(0)
   const [scrollProgress, setScrollProgress] = useState(0)
+  // Empty until the section approaches the viewport — see the effect below.
+  const [videoSrc, setVideoSrc] = useState<string>()
+
+  // The clip is ~6 MB, so it must not load with the page. Attach the source
+  // only once the section is within a screenful of the viewport; `preload
+  //="metadata"` then fetches just the header until the scroll handler seeks,
+  // at which point the browser range-requests the frames it needs.
+  useEffect(() => {
+    const section = sectionRef.current
+    if (!section) return
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries.some(e => e.isIntersecting)) {
+          setVideoSrc('/images/Siemens_CT_motion.mp4')
+          observer.disconnect()
+        }
+      },
+      // A fixed lead-in, not a viewport-relative one: "100%" on a short desktop
+      // viewport reaches past the hero and fires at scroll 0.
+      { rootMargin: '400px 0px' },
+    )
+    observer.observe(section)
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     const video = videoRef.current
@@ -373,10 +397,10 @@ export default function SolutionsHub() {
               <video
                 aria-hidden="true"
                 ref={videoRef}
-                src="/images/Siemens_CT_motion.mp4"
+                src={videoSrc}
                 muted
                 playsInline
-                preload="auto"
+                preload="metadata"
                 style={{
                   width: '100%',
                   height: '440px',
