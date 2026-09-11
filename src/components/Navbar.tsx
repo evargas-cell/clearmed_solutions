@@ -1,18 +1,32 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, type MouseEvent } from 'react'
 import { Menu, X, ChevronDown } from 'lucide-react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import LogoSVG from './LogoSVG'
+import { useQuoteModal } from './quoteModalContext'
 
+// Homepage section anchors, rendered as "/#id" links: a same-page jump on the
+// homepage (smoothed by html { scroll-behavior }), a normal link elsewhere, and
+// crawlable either way.
 const SERVICES = [
-  { label: 'Siemens CT Service', href: '#siemens-ct' },
-  { label: 'Siemens MRI Service', href: '#siemens-mri' },
-  { label: 'GE CT Service', href: '#ge-ct' },
-  { label: 'GE MRI Service', href: '#ge-mri' },
+  { label: 'Siemens CT Service', href: '/#siemens-ct' },
+  { label: 'Siemens MRI Service', href: '/#siemens-mri' },
+  { label: 'GE CT Service', href: '/#ge-ct' },
+  { label: 'GE MRI Service', href: '/#ge-mri' },
 ]
 
 const EQUIPMENT = [
-  { label: 'CT Scanners', href: '#equipment' },
-  { label: 'MRI Systems', href: '#equipment' },
+  { label: 'CT Scanners', href: '/#equipment' },
+  { label: 'MRI Systems', href: '/#equipment' },
+]
+
+const MOBILE_ITEMS = [
+  { label: 'Home', href: '/' },
+  ...SERVICES,
+  { label: 'Equipment', href: '/#equipment' },
+  { label: 'Our Work', href: '/#gallery' },
+  { label: 'About', href: '/#about' },
+  { label: 'Contact', href: '/#contact' },
+  { label: 'Blog', href: '/blog' },
 ]
 
 export default function Navbar() {
@@ -23,9 +37,9 @@ export default function Navbar() {
   const [activeSection, setActiveSection] = useState('')
   const servicesRef = useRef<HTMLDivElement>(null)
   const equipmentRef = useRef<HTMLDivElement>(null)
-  const navigate = useNavigate()
   const location = useLocation()
   const isHome = location.pathname === '/'
+  const quote = useQuoteModal()
 
   useEffect(() => {
     const onScroll = () => {
@@ -47,7 +61,7 @@ export default function Navbar() {
   }, [isHome])
 
   useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
+    const handleClick = (e: globalThis.MouseEvent) => {
       if (servicesRef.current && !servicesRef.current.contains(e.target as Node)) setServicesOpen(false)
       if (equipmentRef.current && !equipmentRef.current.contains(e.target as Node)) setEquipmentOpen(false)
     }
@@ -55,18 +69,52 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
-  const scrollTo = (href: string) => {
+  const closeMenus = () => {
     setMobileOpen(false)
     setServicesOpen(false)
     setEquipmentOpen(false)
-    if (!isHome) {
-      if (href === '#') { navigate('/'); return }
-      window.location.href = '/' + href
-      return
+  }
+
+  // Quote links stay real links to #contact (crawlable, and they still work
+  // without JS); the click opens the dialog instead of scrolling.
+  const onQuoteClick = (e: MouseEvent) => {
+    e.preventDefault()
+    closeMenus()
+    quote.open()
+  }
+
+  // "Home" on the homepage scrolls back to the top instead of reloading.
+  const onHomeClick = (e: MouseEvent) => {
+    closeMenus()
+    if (isHome) {
+      e.preventDefault()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
-    if (href === '#') { window.scrollTo({ top: 0, behavior: 'smooth' }); return }
-    const el = document.querySelector(href)
-    if (el) el.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const mobileItemStyle: React.CSSProperties = {
+    display: 'block',
+    width: '100%',
+    textAlign: 'left',
+    padding: '0.7rem 0.75rem',
+    borderRadius: '8px',
+    fontSize: '0.875rem',
+    color: '#012854',
+    fontWeight: 600,
+    fontFamily: 'Montserrat, sans-serif',
+    textDecoration: 'none',
+    background: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    transition: 'background-color 0.15s ease, color 0.15s ease',
+  }
+  const mobileHoverIn = (e: MouseEvent<HTMLAnchorElement>) => {
+    e.currentTarget.style.backgroundColor = 'rgba(0,159,193,0.07)'
+    e.currentTarget.style.color = '#009fc1'
+  }
+  const mobileHoverOut = (e: MouseEvent<HTMLAnchorElement>) => {
+    e.currentTarget.style.backgroundColor = 'transparent'
+    e.currentTarget.style.color = '#012854'
   }
 
   return (
@@ -99,6 +147,7 @@ export default function Navbar() {
           display: flex;
           align-items: center;
           gap: 4px;
+          text-decoration: none;
         }
         .nav-link::after {
           content: '';
@@ -136,6 +185,7 @@ export default function Navbar() {
           border-radius: 6px;
           margin: 1px 4px;
           width: calc(100% - 8px);
+          text-decoration: none;
         }
         .nav-dropdown-item:hover {
           background-color: rgba(0,159,193,0.07);
@@ -145,6 +195,7 @@ export default function Navbar() {
       `}</style>
 
       <nav
+        aria-label="Main"
         style={{
           fontFamily: 'Montserrat, sans-serif',
           background: scrolled ? 'rgba(255,255,255,0.92)' : '#ffffff',
@@ -164,28 +215,25 @@ export default function Navbar() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '72px' }}>
 
             {/* Logo */}
-            <button
-              onClick={() => scrollTo('#')}
+            <Link
+              to="/"
+              onClick={onHomeClick}
               style={{
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                padding: 0,
                 display: 'flex',
                 alignItems: 'center',
                 flexShrink: 0,
               }}
-              aria-label="ClearMed Imaging Solutions – go to top"
+              aria-label="ClearMed Imaging Solutions – home"
             >
               <LogoSVG height={52} />
-            </button>
+            </Link>
 
             {/* Desktop Nav */}
             <div className="hidden lg:flex items-center" style={{ gap: '0.15rem' }}>
 
-              <button className={`nav-link${isHome && !activeSection ? ' active' : ''}`} onClick={() => scrollTo('#')}>
+              <Link to="/" className={`nav-link${isHome && !activeSection ? ' active' : ''}`} onClick={onHomeClick}>
                 Home
-              </button>
+              </Link>
 
               {/* Services Dropdown */}
               <div ref={servicesRef} style={{ position: 'relative' }}>
@@ -193,6 +241,7 @@ export default function Navbar() {
                   className={`nav-link${activeSection === 'services' ? ' active' : ''}`}
                   onClick={() => { setServicesOpen(!servicesOpen); setEquipmentOpen(false) }}
                   aria-expanded={servicesOpen}
+                  aria-controls="nav-services-menu"
                 >
                   Services
                   <ChevronDown
@@ -204,7 +253,11 @@ export default function Navbar() {
                     }}
                   />
                 </button>
+                {/* inert while closed: the links stay in the HTML for
+                    crawlers but out of the keyboard tab order. */}
                 <div
+                  id="nav-services-menu"
+                  inert={!servicesOpen}
                   className={`nav-dropdown${servicesOpen ? ' open' : ''}`}
                   style={{
                     position: 'absolute',
@@ -221,13 +274,9 @@ export default function Navbar() {
                   }}
                 >
                   {SERVICES.map(s => (
-                    <button
-                      key={s.label}
-                      className="nav-dropdown-item"
-                      onClick={() => scrollTo(s.href)}
-                    >
+                    <a key={s.label} href={s.href} className="nav-dropdown-item" onClick={closeMenus}>
                       {s.label}
-                    </button>
+                    </a>
                   ))}
                 </div>
               </div>
@@ -238,6 +287,7 @@ export default function Navbar() {
                   className={`nav-link${activeSection === 'equipment' ? ' active' : ''}`}
                   onClick={() => { setEquipmentOpen(!equipmentOpen); setServicesOpen(false) }}
                   aria-expanded={equipmentOpen}
+                  aria-controls="nav-equipment-menu"
                 >
                   Equipment
                   <ChevronDown
@@ -250,6 +300,8 @@ export default function Navbar() {
                   />
                 </button>
                 <div
+                  id="nav-equipment-menu"
+                  inert={!equipmentOpen}
                   className={`nav-dropdown${equipmentOpen ? ' open' : ''}`}
                   style={{
                     position: 'absolute',
@@ -266,47 +318,46 @@ export default function Navbar() {
                   }}
                 >
                   {EQUIPMENT.map(eq => (
-                    <button
-                      key={eq.label}
-                      className="nav-dropdown-item"
-                      onClick={() => scrollTo(eq.href)}
-                    >
+                    <a key={eq.label} href={eq.href} className="nav-dropdown-item" onClick={closeMenus}>
                       {eq.label}
-                    </button>
+                    </a>
                   ))}
                 </div>
               </div>
 
               {[
-                { label: 'Our Work', href: '#gallery', section: 'gallery' },
-                { label: 'About', href: '#about', section: 'about' },
-                { label: 'Contact', href: '#contact', section: 'contact' },
+                { label: 'Our Work', href: '/#gallery', section: 'gallery' },
+                { label: 'About', href: '/#about', section: 'about' },
+                { label: 'Contact', href: '/#contact', section: 'contact' },
               ].map(({ label, href, section }) => (
-                <button
+                <a
                   key={label}
+                  href={href}
                   className={`nav-link${activeSection === section ? ' active' : ''}`}
-                  onClick={() => scrollTo(href)}
+                  onClick={closeMenus}
                 >
                   {label}
-                </button>
+                </a>
               ))}
 
-              <button
+              <Link
+                to="/blog"
                 className="nav-link"
-                onClick={() => navigate('/blog')}
+                onClick={closeMenus}
                 style={{ color: location.pathname.startsWith('/blog') ? '#009fc1' : undefined }}
               >
                 Blog
-              </button>
+              </Link>
 
               {/* CTA */}
-              <button
-                onClick={() => scrollTo('#contact')}
+              <a
+                href="/#contact"
+                onClick={onQuoteClick}
                 className="btn-amber"
                 style={{ fontSize: '0.8rem', padding: '0.6rem 1.4rem', marginLeft: '0.75rem' }}
               >
                 Get Service Quote
-              </button>
+              </a>
             </div>
 
             {/* Mobile hamburger */}
@@ -324,6 +375,7 @@ export default function Navbar() {
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="Toggle menu"
               aria-expanded={mobileOpen}
+              aria-controls="nav-mobile-menu"
               onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(0,159,193,0.07)')}
               onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
             >
@@ -332,8 +384,10 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu — inert while collapsed, like the dropdowns */}
         <div
+          id="nav-mobile-menu"
+          inert={!mobileOpen}
           style={{
             maxHeight: mobileOpen ? '520px' : '0',
             overflow: 'hidden',
@@ -350,54 +404,32 @@ export default function Navbar() {
               gap: '2px',
             }}
           >
-            {[
-              { label: 'Home', href: '#' },
-              { label: 'Siemens CT Service', href: '#siemens-ct' },
-              { label: 'Siemens MRI Service', href: '#siemens-mri' },
-              { label: 'GE CT Service', href: '#ge-ct' },
-              { label: 'GE MRI Service', href: '#ge-mri' },
-              { label: 'Equipment', href: '#equipment' },
-              { label: 'Our Work', href: '#gallery' },
-              { label: 'About', href: '#about' },
-              { label: 'Contact', href: '#contact' },
-              { label: 'Blog', href: '/blog' },
-            ].map(item => (
-              <button
-                key={item.label}
-                onClick={() => item.href.startsWith('/') ? (setMobileOpen(false), navigate(item.href)) : scrollTo(item.href)}
-                style={{
-                  width: '100%',
-                  textAlign: 'left',
-                  padding: '0.7rem 0.75rem',
-                  borderRadius: '8px',
-                  fontSize: '0.875rem',
-                  color: '#012854',
-                  fontWeight: 600,
-                  fontFamily: 'Montserrat, sans-serif',
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.15s ease, color 0.15s ease',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.backgroundColor = 'rgba(0,159,193,0.07)'
-                  e.currentTarget.style.color = '#009fc1'
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                  e.currentTarget.style.color = '#012854'
-                }}
-              >
-                {item.label}
-              </button>
-            ))}
-            <button
-              onClick={() => scrollTo('#contact')}
+            {MOBILE_ITEMS.map(item =>
+              item.href.startsWith('/#') ? (
+                <a key={item.label} href={item.href} onClick={closeMenus} style={mobileItemStyle} onMouseEnter={mobileHoverIn} onMouseLeave={mobileHoverOut}>
+                  {item.label}
+                </a>
+              ) : (
+                <Link
+                  key={item.label}
+                  to={item.href}
+                  onClick={item.href === '/' ? onHomeClick : closeMenus}
+                  style={mobileItemStyle}
+                  onMouseEnter={mobileHoverIn}
+                  onMouseLeave={mobileHoverOut}
+                >
+                  {item.label}
+                </Link>
+              ),
+            )}
+            <a
+              href="/#contact"
+              onClick={onQuoteClick}
               className="btn-amber"
               style={{ marginTop: '0.5rem', width: '100%' }}
             >
               Get Service Quote
-            </button>
+            </a>
           </div>
         </div>
       </nav>

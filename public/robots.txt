@@ -1,4 +1,30 @@
+# All crawlers may index the whole site, including AI assistants and answer
+# engines (named explicitly so their access is unambiguous).
 User-agent: *
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: cohere-ai
 Allow: /
 
 Sitemap: https://clearmedimaging.com/sitemap.xml

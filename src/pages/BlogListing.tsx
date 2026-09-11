@@ -4,19 +4,19 @@ import { BLOG_POSTS } from '../data/blogPosts'
 import SEOHead from '../components/SEOHead'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import { BLOG_PAGE } from '../seo/pages'
+import { useQuoteModal } from '../components/quoteModalContext'
 
 export default function BlogListing() {
+  const quote = useQuoteModal()
+
   return (
     <div style={{ width: '100%', minHeight: '100vh', background: '#f8fafc' }}>
-      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50 }}>
+      <header style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50 }}>
         <Navbar />
-      </div>
+      </header>
 
-      <SEOHead
-        title="Resource Library | ClearMed Imaging Solutions"
-        description="In-depth guides on CT and MRI service, maintenance, installation, parts, and contract pricing — written for imaging directors and hospital administrators."
-        path="/blog"
-      />
+      <SEOHead {...BLOG_PAGE} />
       <main style={{ paddingTop: '72px' }}>
         {/* Hero */}
         <div style={{ background: '#012854', padding: '4rem 1.5rem 3.5rem' }}>
@@ -49,7 +49,7 @@ export default function BlogListing() {
                 marginBottom: '1rem',
               }}
             >
-              The ClearMed Resource Library
+              The ClearMed CT &amp; MRI Resource Library
             </h1>
             <p
               style={{
@@ -210,7 +210,7 @@ export default function BlogListing() {
             textAlign: 'center',
           }}
         >
-          <h3
+          <h2
             style={{
               fontFamily: 'Montserrat, sans-serif',
               fontWeight: 800,
@@ -220,7 +220,7 @@ export default function BlogListing() {
             }}
           >
             Ready to discuss your facility's imaging service needs?
-          </h3>
+          </h2>
           <p
             style={{
               fontFamily: 'Open Sans, sans-serif',
@@ -229,11 +229,15 @@ export default function BlogListing() {
               marginBottom: '1.75rem',
             }}
           >
-            Our team provides free consultations and service quotes for facilities across the Southeast.
+            Our team provides free consultations and service quotes for facilities nationwide.
           </p>
-          <Link to="/#contact" style={{ textDecoration: 'none' }}>
-            <button className="btn-amber">Request a Service Quote</button>
-          </Link>
+          <a
+            href="/#contact"
+            className="btn-amber"
+            onClick={e => { e.preventDefault(); quote.open() }}
+          >
+            Request a Service Quote
+          </a>
         </div>
       </main>
 

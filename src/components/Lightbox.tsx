@@ -3,6 +3,7 @@ import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface LightboxItem {
   src: string
+  alt: string
   caption: string
   tag: string
 }
@@ -115,7 +116,7 @@ export default function Lightbox({ items, index, onClose, onPrev, onNext }: Ligh
         <img
           key={item.src}
           src={item.src}
-          alt={item.caption}
+          alt={item.alt}
           style={{
             maxWidth: '100%',
             maxHeight: '70vh',

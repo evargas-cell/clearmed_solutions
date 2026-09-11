@@ -1,15 +1,11 @@
 import { useEffect } from 'react'
+import { OG_IMAGE, SITE_URL, type PageMeta } from '../seo/pages'
 
-const BASE_URL = 'https://clearmedimaging.com'
-const OG_IMAGE = 'https://clearmedimaging.com/images/mri-aera-installed.jpg'
-
-interface SEOHeadProps {
-  title: string
-  description: string
-  path: string
-}
-
-export default function SEOHead({ title, description, path }: SEOHeadProps) {
+/**
+ * Keeps <head> in sync during client-side navigation. The initial HTML for
+ * each route already carries the same tags (scripts/prerender.mjs).
+ */
+export default function SEOHead({ title, description, path }: PageMeta) {
   useEffect(() => {
     document.title = title
 
@@ -43,7 +39,7 @@ export default function SEOHead({ title, description, path }: SEOHeadProps) {
       el.href = href
     }
 
-    const url = `${BASE_URL}${path}`
+    const url = `${SITE_URL}${path}`
 
     setMeta('description', description)
     setCanonical(url)

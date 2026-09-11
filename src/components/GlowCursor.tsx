@@ -8,13 +8,11 @@ export default function GlowCursor() {
   const raf = useRef<number>(0)
   const [isPointer, setIsPointer] = useState(false)
   const [visible, setVisible] = useState(false)
-  const [isTouchDevice, setIsTouchDevice] = useState(false)
 
   useEffect(() => {
-    if (window.matchMedia('(pointer: coarse)').matches) {
-      setIsTouchDevice(true)
-      return
-    }
+    // Touch devices keep the native cursor: no listeners, so `visible` stays
+    // false and the dot and glow stay transparent.
+    if (window.matchMedia('(pointer: coarse)').matches) return
 
     const onMove = (e: MouseEvent) => {
       pos.current = { x: e.clientX, y: e.clientY }
@@ -53,14 +51,14 @@ export default function GlowCursor() {
     }
   }, [])
 
-  if (isTouchDevice) return null
-
   const dotSize = isPointer ? 12 : 7
   const glowSize = isPointer ? 80 : 48
 
   return (
     <>
-      <style>{`* { cursor: none !important; }`}</style>
+      {/* Hide the native cursor only while the custom one is showing — never in
+          the prerendered HTML, where JS may not have loaded yet. */}
+      {visible && <style>{`* { cursor: none !important; }`}</style>}
 
       {/* Precise dot */}
       <div

@@ -8,6 +8,8 @@ export interface BlogSection {
 export interface BlogPost {
   slug: string
   title: string
+  /** Short title for the <title> tag — keep it under ~40 characters. */
+  seoTitle: string
   subtitle: string
   category: string
   categoryColor: string
@@ -21,6 +23,7 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: 'cost-of-deferred-maintenance',
     title: 'The Real Cost of Deferred Medical Imaging Maintenance',
+    seoTitle: 'Cost of Deferred CT & MRI Maintenance',
     subtitle: 'Why skipping preventive maintenance on your CT or MRI system costs far more than the service visit you avoided',
     category: 'Preventive Maintenance',
     categoryColor: '#007070',
@@ -90,6 +93,7 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: 'oem-vs-iso-service',
     title: 'OEM vs. Independent Service Organizations: What Every Imaging Director Needs to Know',
+    seoTitle: 'OEM vs. ISO Service for CT & MRI Systems',
     subtitle: 'A straightforward comparison of manufacturer service contracts versus ISOs — on cost, response time, quality, and multi-vendor capability',
     category: 'Service Strategy',
     categoryColor: '#012854',
@@ -152,6 +156,7 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: 'ct-mri-installation-guide',
     title: 'Planning a CT or MRI Installation: A Decision Maker\'s Complete Guide',
+    seoTitle: 'CT & MRI Installation Planning Guide',
     subtitle: 'From site assessment to system go-live — what to expect, what can go wrong, and how to protect your timeline and budget',
     category: 'Installation',
     categoryColor: '#009fc1',
@@ -228,6 +233,7 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: 'oem-vs-aftermarket-parts',
     title: 'OEM vs. Aftermarket Parts for CT and MRI: What\'s Really at Stake',
+    seoTitle: 'OEM vs. Aftermarket CT & MRI Parts',
     subtitle: 'Quality, regulatory compliance, warranty implications, and how to make the right sourcing decision for your facility',
     category: 'Parts & Components',
     categoryColor: '#7c3aed',
@@ -289,6 +295,7 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: 'service-contract-pricing',
     title: 'Decoding CT & MRI Service Contract Pricing: What You\'re Really Paying For',
+    seoTitle: 'CT & MRI Service Contract Pricing Guide',
     subtitle: 'How to evaluate service contract proposals, what\'s typically included and excluded, and where the real negotiating leverage lies',
     category: 'Cost & Contracts',
     categoryColor: '#b45309',
@@ -369,6 +376,7 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: 'repair-vs-replace',
     title: 'Repair vs. Replace: How to Know When Your CT or MRI System Has Reached End of Life',
+    seoTitle: 'Repair vs. Replace a CT or MRI System',
     subtitle: 'A practical framework for imaging directors and CFOs evaluating whether to extend a system\'s service life or plan capital replacement',
     category: 'Strategic Planning',
     categoryColor: '#0f766e',

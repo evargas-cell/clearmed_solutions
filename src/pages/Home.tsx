@@ -11,18 +11,15 @@ import ContactSection from '../components/ContactSection'
 import TeamSection from '../components/TeamSection'
 import BlogPreviewSection from '../components/BlogPreviewSection'
 import Footer from '../components/Footer'
+import { HOME_PAGE } from '../seo/pages'
 
 export default function Home() {
   return (
     <div style={{ width: '100%', minHeight: '100vh' }}>
-      <SEOHead
-        title="ClearMed Imaging Solutions"
-        description="OEM-certified service, installation, and preventive maintenance for Siemens and GE CT and MRI imaging systems across the Southeast."
-        path="/"
-      />
-      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50 }}>
+      <SEOHead {...HOME_PAGE} />
+      <header style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50 }}>
         <Navbar />
-      </div>
+      </header>
       <main>
         <HeroSection />
         <ServicesGrid />

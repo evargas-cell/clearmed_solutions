@@ -97,7 +97,7 @@ export default function BlogPreviewSection() {
           }}
         >
           {PREVIEW.map((post, i) => (
-            <Link key={post.slug} to={`/blog/${post.slug}`} style={{ textDecoration: 'none', opacity: inView ? 1 : 0, translate: inView ? '0 0' : '0 28px', transition: `opacity 0.6s ease ${i * 0.1}s, translate 0.6s cubic-bezier(0.16,1,0.3,1) ${i * 0.1}s` }}>
+            <Link key={post.slug} to={`/blog/${post.slug}`} className="reveal" style={{ textDecoration: 'none', opacity: inView ? 1 : 0, translate: inView ? '0 0' : '0 28px', transition: `opacity 0.6s ease ${i * 0.1}s, translate 0.6s cubic-bezier(0.16,1,0.3,1) ${i * 0.1}s` }}>
               <article
                 style={{
                   background: '#f8fafc',

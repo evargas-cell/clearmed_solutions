@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type RefObject } from 'react'
+import { useQuoteModal } from './quoteModalContext'
 
 function parseStat(value: string) {
   const m = value.match(/^(\d+)([+%]?)$/)
@@ -6,28 +7,36 @@ function parseStat(value: string) {
   return { num: parseInt(m[1]), suffix: m[2] }
 }
 
-function HeroStat({ value, label, startDelay }: { value: string; label: string; startDelay: number }) {
-  const [count, setCount] = useState(0)
-  const started = useRef(false)
+function HeroStat({ value, label, startDelay, rowRef }: {
+  value: string
+  label: string
+  startDelay: number
+  rowRef: RefObject<HTMLDivElement | null>
+}) {
   const parsed = parseStat(value)
+  // Starts at the final value so the prerendered HTML (what crawlers read)
+  // shows the real number rather than "0+".
+  const [count, setCount] = useState(parsed ? parsed.num : 0)
 
   useEffect(() => {
-    const t = setTimeout(() => {
-      if (started.current || !parsed) return
-      started.current = true
-      const { num } = parsed
-      const duration = 1600
-      const start = performance.now()
-      const tick = (now: number) => {
-        const p = Math.min((now - start) / duration, 1)
-        const eased = 1 - Math.pow(1 - p, 3)
-        setCount(Math.round(eased * num))
-        if (p < 1) requestAnimationFrame(tick)
-      }
-      requestAnimationFrame(tick)
-    }, startDelay)
-    return () => clearTimeout(t)
-  }, [])
+    const target = parseStat(value)
+    const row = rowRef.current
+    // Count up only while the stats row is still hidden by its fade-in delay.
+    // If the prerendered page was already on screen before JS hydrated, the
+    // visitor has seen the final numbers — don't drop them back to zero.
+    if (!target || !row || parseFloat(getComputedStyle(row).opacity) > 0.05) return
+    const duration = 1600
+    const start = performance.now() + startDelay
+    let raf = 0
+    const tick = (now: number) => {
+      const p = Math.min(Math.max((now - start) / duration, 0), 1)
+      const eased = 1 - Math.pow(1 - p, 3)
+      setCount(Math.round(eased * target.num))
+      if (p < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [value, startDelay, rowRef])
 
   const display = parsed ? `${count}${parsed.suffix}` : value
 
@@ -68,10 +77,8 @@ function HeroStat({ value, label, startDelay }: { value: string; label: string; 
 }
 
 export default function HeroSection() {
-  const scrollTo = (href: string) => {
-    const el = document.querySelector(href)
-    if (el) el.scrollIntoView({ behavior: 'smooth' })
-  }
+  const quote = useQuoteModal()
+  const statsRowRef = useRef<HTMLDivElement>(null)
 
   const stats = [
     { value: '20+', label: 'Years Experience' },
@@ -117,36 +124,41 @@ export default function HeroSection() {
         style={{ position: 'relative', zIndex: 1, paddingTop: '2rem', paddingBottom: '2rem', marginTop: '5rem' }}
       >
         <div style={{ textAlign: 'center' }}>
-          {/* Sky subline */}
-          <p
-            className="animate-fadeInUp"
-            style={{
-              fontFamily: 'Montserrat, sans-serif',
-              fontWeight: 700,
-              fontSize: 'clamp(0.85rem, 1.5vw, 1rem)',
-              color: '#009fc1',
-              letterSpacing: '0.1em',
-              marginBottom: '1.25rem',
-              textTransform: 'uppercase',
-            }}
-          >
-            GE &amp; Siemens CT and MRI
-          </p>
-
-          {/* Main headline */}
-          <h1
-            className="animate-fadeInUp delay-100"
-            style={{
-              fontFamily: 'Montserrat, sans-serif',
-              fontWeight: 900,
-              fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
-              color: '#fff',
-              lineHeight: 1.08,
-              letterSpacing: '-0.02em',
-              marginBottom: '1.5rem',
-            }}
-          >
-            Service &amp; Installation
+          {/* The page's single h1 reads "GE & Siemens CT and MRI Service,
+              Installation & Maintenance": the sky subline and the headline are
+              block spans inside it, styled and animated exactly as before. */}
+          <h1>
+            <span
+              className="animate-fadeInUp"
+              style={{
+                display: 'block',
+                fontFamily: 'Montserrat, sans-serif',
+                fontWeight: 700,
+                fontSize: 'clamp(0.85rem, 1.5vw, 1rem)',
+                color: '#009fc1',
+                letterSpacing: '0.1em',
+                lineHeight: 1.5,
+                marginBottom: '1.25rem',
+                textTransform: 'uppercase',
+              }}
+            >
+              GE &amp; Siemens CT and MRI
+            </span>{' '}
+            <span
+              className="animate-fadeInUp delay-100"
+              style={{
+                display: 'block',
+                fontFamily: 'Montserrat, sans-serif',
+                fontWeight: 900,
+                fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
+                color: '#fff',
+                lineHeight: 1.08,
+                letterSpacing: '-0.02em',
+                marginBottom: '1.5rem',
+              }}
+            >
+              Service, Installation &amp; Maintenance
+            </span>
           </h1>
 
           {/* Body copy */}
@@ -171,22 +183,22 @@ export default function HeroSection() {
             className="animate-fadeInUp delay-400"
             style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '3.5rem', justifyContent: 'center' }}
           >
-            <button
-              onClick={() => scrollTo('#services')}
-              className="btn-amber"
-            >
+            {/* Real links (smooth-scrolled by html { scroll-behavior }) */}
+            <a href="#services" className="btn-amber">
               Our Services
-            </button>
-            <button
-              onClick={() => scrollTo('#contact')}
+            </a>
+            <a
+              href="#contact"
               className="btn-outline-white"
+              onClick={e => { e.preventDefault(); quote.open() }}
             >
               Contact Us
-            </button>
+            </a>
           </div>
 
           {/* Stats row */}
           <div
+            ref={statsRowRef}
             className="animate-fadeInUp delay-500"
             style={{
               display: 'grid',
@@ -204,6 +216,7 @@ export default function HeroSection() {
                 value={stat.value}
                 label={stat.label}
                 startDelay={800 + i * 120}
+                rowRef={statsRowRef}
               />
             ))}
           </div>

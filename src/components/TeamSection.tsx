@@ -22,7 +22,7 @@ export default function TeamSection() {
   const { ref, inView } = useInView(0.1)
 
   return (
-    <section id="about" style={{ background: '#f8fafc', padding: '5rem 0' }}>
+    <section id="founders" style={{ background: '#f8fafc', padding: '5rem 0' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-14">
@@ -83,6 +83,7 @@ export default function TeamSection() {
           {FOUNDERS.map((founder, i) => (
             <div
               key={founder.name}
+              className="reveal"
               style={{
                 background: '#ffffff',
                 borderRadius: '20px',
@@ -112,7 +113,7 @@ export default function TeamSection() {
               >
                 <img
                   src={founder.image}
-                  alt={founder.name}
+                  alt={`${founder.name}, ${founder.title.toLowerCase()} of ClearMed Imaging Solutions`}
                   style={{
                     width: '100%',
                     height: '100%',

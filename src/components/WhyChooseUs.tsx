@@ -1,4 +1,5 @@
 import { Award, Clock, FileText } from 'lucide-react'
+import { useQuoteModal } from './quoteModalContext'
 
 const FEATURES = [
   {
@@ -31,6 +32,8 @@ const FEATURES = [
 ]
 
 export default function WhyChooseUs() {
+  const quote = useQuoteModal()
+
   return (
     <section style={{ background: '#fff', padding: '5rem 0' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -107,7 +110,7 @@ export default function WhyChooseUs() {
                       <Icon size={20} style={{ color: '#012854' }} />
                     </div>
                     <div>
-                      <h4
+                      <h3
                         style={{
                           fontFamily: 'Montserrat, sans-serif',
                           fontWeight: 700,
@@ -117,7 +120,7 @@ export default function WhyChooseUs() {
                         }}
                       >
                         {title}
-                      </h4>
+                      </h3>
                       <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                         {bullets.map((b, i) => (
                           <li
@@ -151,13 +154,7 @@ export default function WhyChooseUs() {
                 ))}
               </div>
 
-              <button
-                onClick={() => {
-                  const el = document.querySelector('#contact')
-                  if (el) el.scrollIntoView({ behavior: 'smooth' })
-                }}
-                className="btn-amber"
-              >
+              <button onClick={quote.open} className="btn-amber">
                 Get a Free Consultation
               </button>
             </div>
@@ -173,7 +170,7 @@ export default function WhyChooseUs() {
               >
                 <img
                   src="/images/mri-espree-front.jpg"
-                  alt="Siemens MAGNETOM Espree"
+                  alt="Siemens MAGNETOM Espree 1.5T open-bore MRI scanner in a finished scan room"
                   style={{
                     width: '100%',
                     height: '520px',

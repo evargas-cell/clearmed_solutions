@@ -1,39 +1,47 @@
 import { useState } from 'react'
 import Lightbox from './Lightbox'
+import { useQuoteModal } from './quoteModalContext'
 
+// `alt` describes what is in the photo; `caption` is the visible overlay text.
 const GALLERY = [
   {
+    src: '/images/GECT_Ankur.jpg',
+    alt: 'ClearMed co-founder Ankur Patel servicing a GE CT scanner with the gantry covers removed',
+    caption: 'GE CT — Gantry Service in Progress',
+    tag: 'CT Service',
+    objectPosition: 'center 45%',
+  },
+  {
     src: '/images/mri-aera-installed.jpg',
+    alt: 'Siemens MAGNETOM Aera 1.5T MRI scanner installed and commissioned in a finished scan room',
     caption: 'Siemens MAGNETOM Aera — Installed & Commissioned',
     tag: 'MRI Installation',
     objectPosition: '65% 40%',
   },
   {
     src: '/images/mri-espree-front.jpg',
+    alt: 'Siemens MAGNETOM Espree 1.5T open-bore MRI scanner in a finished, patient-ready scan room',
     caption: 'Siemens MAGNETOM Espree — Clinical Room Ready',
     tag: 'MRI Service',
     objectPosition: 'center 35%',
   },
   {
-    src: '/images/mri-espree-side.jpg',
-    caption: 'Siemens MAGNETOM Espree — Full Installation',
-    tag: 'MRI Installation',
-    objectPosition: '40% center',
-  },
-  {
     src: '/images/ct-definition-flash.jpg',
+    alt: 'Siemens SOMATOM Definition Flash dual-source CT scanner installed in a mobile imaging trailer',
     caption: 'Siemens SOMATOM Definition Flash — Mobile CT',
     tag: 'CT Service',
     objectPosition: 'center 40%',
   },
   {
     src: '/images/mri-crane-1.jpg',
+    alt: 'Crane lifting a shrink-wrapped Siemens MRI magnet outside a warehouse while the rigging crew looks on',
     caption: 'Crane Lift — MRI Magnet Bore Rigging',
     tag: 'Heavy Equipment Moving',
     objectPosition: '35% 55%',
   },
   {
     src: '/images/mri-install-rolling-2.jpg',
+    alt: 'Rigging crew guiding a shrink-wrapped Siemens MRI magnet on skates into a building through a removed storefront wall',
     caption: 'MRI Magnet — Precision Maneuvering Into Facility',
     tag: 'System Installation',
     objectPosition: 'center center',
@@ -41,6 +49,7 @@ const GALLERY = [
 ]
 
 export default function GallerySection() {
+  const quote = useQuoteModal()
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
   return (
@@ -84,12 +93,18 @@ export default function GallerySection() {
               onClick={() => setLightboxIndex(i)}
               role="button"
               tabIndex={0}
-              aria-label={`Open ${item.caption}`}
-              onKeyDown={e => e.key === 'Enter' && setLightboxIndex(i)}
+              aria-label={`Open larger photo: ${item.caption}`}
+              onKeyDown={e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  setLightboxIndex(i)
+                }
+              }}
             >
               <img
                 src={item.src}
-                alt={item.caption}
+                alt={item.alt}
+                loading="lazy"
                 className="w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 style={{ height: '280px', objectPosition: item.objectPosition }}
               />
@@ -122,10 +137,7 @@ export default function GallerySection() {
           <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '16px' }}>
             Ready to get your system installed or serviced by the pros?
           </p>
-          <button
-            onClick={() => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })}
-            className="btn-amber"
-          >
+          <button onClick={quote.open} className="btn-amber">
             Request a Quote
           </button>
         </div>

@@ -1,4 +1,5 @@
 import { CheckCircle } from 'lucide-react'
+import { useQuoteModal } from './quoteModalContext'
 
 const CHECKLIST = [
   'OEM-certified preventive maintenance',
@@ -11,28 +12,36 @@ const CHECKLIST = [
   'Multi-system service contracts',
 ]
 
+// `id`s are link targets (footer, structured data) for each service.
 const OFFERINGS = [
   {
+    id: 'preventive-maintenance',
     title: 'Preventive Maintenance',
     desc: 'Scheduled PMs that meet OEM standards and keep your system warranty-compliant.',
   },
   {
+    id: 'emergency-repair',
     title: 'Emergency Repair',
     desc: 'Same-day emergency response for critical failures — minimizing patient care disruption.',
   },
   {
+    id: 'installation',
     title: 'System Installation',
     desc: 'Full-service rigging, siting, installation, and clinical commissioning of CT and MRI systems.',
   },
   {
+    id: 'remote-support',
     title: 'Remote Support',
     desc: 'Remote diagnostics and guided troubleshooting to resolve issues before dispatching on-site.',
   },
 ]
 
 export default function SupportSection() {
+  const quote = useQuoteModal()
+
   return (
     <section
+      id="support"
       style={{
         position: 'relative',
         padding: '5rem 0',
@@ -129,13 +138,7 @@ export default function SupportSection() {
               ))}
             </ul>
 
-            <button
-              onClick={() => {
-                const el = document.querySelector('#contact')
-                if (el) el.scrollIntoView({ behavior: 'smooth' })
-              }}
-              className="btn-amber"
-            >
+            <button onClick={quote.open} className="btn-amber">
               Request Support
             </button>
           </div>
@@ -166,8 +169,10 @@ export default function SupportSection() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               {OFFERINGS.map(o => (
                 <div
-                  key={o.title}
+                  key={o.id}
+                  id={o.id}
                   style={{
+                    scrollMarginTop: '96px', // clear the fixed navbar when linked to
                     background: 'rgba(255,255,255,0.06)',
                     borderRadius: '12px',
                     padding: '1rem 1.25rem',

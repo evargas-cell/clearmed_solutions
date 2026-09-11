@@ -1,109 +1,9 @@
-import { useRef, useState } from 'react'
-import { Mail, MapPin, Clock, CheckCircle, ArrowRight } from 'lucide-react'
-import Turnstile from './Turnstile'
-
-const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined
-
-interface FormData {
-  firstName: string
-  lastName: string
-  email: string
-  phone: string
-  organization: string
-  equipmentType: string
-  serviceNeeded: string
-  message: string
-}
-
-const INITIAL: FormData = {
-  firstName: '', lastName: '', email: '', phone: '',
-  organization: '', equipmentType: '', serviceNeeded: '', message: '',
-}
+import { Mail, MapPin, Clock, Phone } from 'lucide-react'
+import ServiceRequestForm from './ServiceRequestForm'
+import SocialLinks from './SocialLinks'
+import { COMPANY } from '../data/company'
 
 export default function ContactSection() {
-  const [form, setForm] = useState<FormData>(INITIAL)
-  const [submitted, setSubmitted] = useState(false)
-
-  const handle = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
-
-  const [error, setError] = useState(false)
-  const [errorMsg, setErrorMsg] = useState('')
-  const [sending, setSending] = useState(false)
-
-  // ── Spam defenses ───────────────────────────────────────────────────────────
-  const [captchaToken, setCaptchaToken] = useState('')
-  const [captchaNonce, setCaptchaNonce] = useState(0)
-  // Honeypot: hidden from real users, irresistible to naive bots.
-  const [website, setWebsite] = useState('')
-  // Bots fill and submit near-instantly; humans do not.
-  const openedAt = useRef(Date.now())
-
-  const encode = (data: Record<string, string>) =>
-    Object.entries(data)
-      .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
-      .join('&')
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(false)
-    setErrorMsg('')
-
-    if (TURNSTILE_SITE_KEY && !captchaToken) {
-      setError(true)
-      setErrorMsg('Please complete the "I\'m not a robot" verification below before submitting.')
-      return
-    }
-
-    setSending(true)
-    try {
-      const res = await fetch('/.netlify/functions/submit-form', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: encode({
-          ...(form as unknown as Record<string, string>),
-          'cf-turnstile-response': captchaToken,
-          website,
-          elapsed: String(Date.now() - openedAt.current),
-        }),
-      })
-      if (res.ok) {
-        setSubmitted(true)
-      } else {
-        setError(true)
-        setCaptchaToken('')
-        setCaptchaNonce(n => n + 1)
-      }
-    } catch (_err) {
-      setError(true)
-      setCaptchaToken('')
-      setCaptchaNonce(n => n + 1)
-    } finally {
-      setSending(false)
-    }
-  }
-
-  const resetForm = () => {
-    setSubmitted(false)
-    setForm(INITIAL)
-    setWebsite('')
-    setCaptchaToken('')
-    setCaptchaNonce(n => n + 1)
-    openedAt.current = Date.now()
-  }
-
-  const inputClass = `
-    w-full rounded-xl border px-4 py-3 text-sm focus:outline-none
-  `
-  const inputStyle = {
-    borderColor: '#e2e8f0',
-    fontFamily: 'Open Sans, sans-serif',
-    color: '#1e293b',
-    background: '#f8fafc',
-    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-  }
-  const focusRingColor = '#009fc1'
-
   return (
     <section id="contact" style={{ background: '#fff', padding: '5rem 0' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -126,240 +26,9 @@ export default function ContactSection() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          {/* Form */}
+          {/* Form — same component the quote dialog uses */}
           <div className="lg:col-span-2">
-            {submitted ? (
-              <div
-                className="rounded-2xl p-10 flex flex-col items-center justify-center text-center"
-                style={{ background: '#f0fdf4', border: '2px solid #86efac', minHeight: '400px' }}
-              >
-                <CheckCircle size={56} style={{ color: '#16a34a' }} className="mb-4" />
-                <h3
-                  style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: '1.5rem', color: '#166534' }}
-                >
-                  Thank You!
-                </h3>
-                <p className="mt-3 max-w-sm" style={{ color: '#15803d', fontSize: '1rem', lineHeight: '1.7' }}>
-                  Your request has been received. A ClearMed specialist will contact you within one business day.
-                </p>
-                <button
-                  onClick={resetForm}
-                  className="btn-sky mt-6"
-                  style={{ fontSize: '0.85rem' }}
-                >
-                  Submit Another Request
-                </button>
-              </div>
-            ) : (
-              <>
-                {error ? (
-                  <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '12px', padding: '1rem', marginBottom: '1rem', color: '#dc2626', fontFamily: 'Open Sans, sans-serif', fontSize: '0.875rem' }}>
-                    {errorMsg || 'Something went wrong. Please try again or email us directly at support@clearmedimaging.com'}
-                  </div>
-                ) : null}
-                <form onSubmit={submit} className="space-y-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div>
-                    <label className="block text-sm font-semibold mb-1.5" style={{ color: '#374151', fontFamily: 'Montserrat, sans-serif' }}>
-                      First Name <span style={{ color: '#dc2626' }}>*</span>
-                    </label>
-                    <input
-                      required
-                      type="text"
-                      name="firstName"
-                      value={form.firstName}
-                      onChange={handle}
-                      placeholder="John"
-                      className={inputClass}
-                      style={{ ...inputStyle, outline: 'none' }}
-                      onFocus={e => (e.target.style.borderColor = focusRingColor)}
-                      onBlur={e => (e.target.style.borderColor = '#e2e8f0')}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold mb-1.5" style={{ color: '#374151', fontFamily: 'Montserrat, sans-serif' }}>
-                      Last Name <span style={{ color: '#dc2626' }}>*</span>
-                    </label>
-                    <input
-                      required
-                      type="text"
-                      name="lastName"
-                      value={form.lastName}
-                      onChange={handle}
-                      placeholder="Smith"
-                      className={inputClass}
-                      style={{ ...inputStyle, outline: 'none' }}
-                      onFocus={e => (e.target.style.borderColor = focusRingColor)}
-                      onBlur={e => (e.target.style.borderColor = '#e2e8f0')}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div>
-                    <label className="block text-sm font-semibold mb-1.5" style={{ color: '#374151', fontFamily: 'Montserrat, sans-serif' }}>
-                      Email <span style={{ color: '#dc2626' }}>*</span>
-                    </label>
-                    <input
-                      required
-                      type="email"
-                      name="email"
-                      value={form.email}
-                      onChange={handle}
-                      placeholder="john@hospital.com"
-                      className={inputClass}
-                      style={{ ...inputStyle, outline: 'none' }}
-                      onFocus={e => (e.target.style.borderColor = focusRingColor)}
-                      onBlur={e => (e.target.style.borderColor = '#e2e8f0')}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold mb-1.5" style={{ color: '#374151', fontFamily: 'Montserrat, sans-serif' }}>
-                      Phone <span style={{ color: '#dc2626' }}>*</span>
-                    </label>
-                    <input
-                      required
-                      type="tel"
-                      name="phone"
-                      value={form.phone}
-                      onChange={handle}
-                      placeholder="(555) 000-0000"
-                      className={inputClass}
-                      style={{ ...inputStyle, outline: 'none' }}
-                      onFocus={e => (e.target.style.borderColor = focusRingColor)}
-                      onBlur={e => (e.target.style.borderColor = '#e2e8f0')}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold mb-1.5" style={{ color: '#374151', fontFamily: 'Montserrat, sans-serif' }}>
-                    Organization <span style={{ color: '#dc2626' }}>*</span>
-                  </label>
-                  <input
-                    required
-                    type="text"
-                    name="organization"
-                    value={form.organization}
-                    onChange={handle}
-                    placeholder="Hospital or Imaging Center Name"
-                    className={inputClass}
-                    style={{ ...inputStyle, outline: 'none' }}
-                    onFocus={e => (e.target.style.borderColor = focusRingColor)}
-                    onBlur={e => (e.target.style.borderColor = '#e2e8f0')}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div>
-                    <label className="block text-sm font-semibold mb-1.5" style={{ color: '#374151', fontFamily: 'Montserrat, sans-serif' }}>
-                      Equipment Type
-                    </label>
-                    <select
-                      name="equipmentType"
-                      value={form.equipmentType}
-                      onChange={handle}
-                      className={inputClass}
-                      style={{ ...inputStyle, outline: 'none', cursor: 'pointer' }}
-                      onFocus={e => (e.target.style.borderColor = focusRingColor)}
-                      onBlur={e => (e.target.style.borderColor = '#e2e8f0')}
-                    >
-                      <option value="">Select equipment type</option>
-                      <option>GE CT</option>
-                      <option>GE MRI</option>
-                      <option>Siemens CT</option>
-                      <option>Siemens MRI</option>
-                      <option>Multiple Systems</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold mb-1.5" style={{ color: '#374151', fontFamily: 'Montserrat, sans-serif' }}>
-                      Service Needed
-                    </label>
-                    <select
-                      name="serviceNeeded"
-                      value={form.serviceNeeded}
-                      onChange={handle}
-                      className={inputClass}
-                      style={{ ...inputStyle, outline: 'none', cursor: 'pointer' }}
-                      onFocus={e => (e.target.style.borderColor = focusRingColor)}
-                      onBlur={e => (e.target.style.borderColor = '#e2e8f0')}
-                    >
-                      <option value="">Select service type</option>
-                      <option>Service &amp; Install</option>
-                      <option>Preventive Maintenance</option>
-                      <option>Remote Diagnostics</option>
-                      <option>Technical Support</option>
-                      <option>Emergency Repair</option>
-                      <option>Service Quote</option>
-                      <option>System Installation</option>
-                      <option>Technical Consultation</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold mb-1.5" style={{ color: '#374151', fontFamily: 'Montserrat, sans-serif' }}>
-                    Message
-                  </label>
-                  <textarea
-                    name="message"
-                    value={form.message}
-                    onChange={handle}
-                    rows={4}
-                    placeholder="Tell us more about your equipment and service needs..."
-                    className={inputClass}
-                    style={{ ...inputStyle, outline: 'none', resize: 'vertical' }}
-                    onFocus={e => (e.target.style.borderColor = focusRingColor)}
-                    onBlur={e => (e.target.style.borderColor = '#e2e8f0')}
-                  />
-                </div>
-
-                {/* Honeypot — hidden from humans, off-screen rather than display:none
-                    so bots that skip hidden inputs still see it. */}
-                <div
-                  aria-hidden="true"
-                  style={{
-                    position: 'absolute',
-                    left: '-9999px',
-                    width: '1px',
-                    height: '1px',
-                    overflow: 'hidden',
-                  }}
-                >
-                  <label htmlFor="website-url">Do not fill this out</label>
-                  <input
-                    id="website-url"
-                    type="text"
-                    name="website"
-                    value={website}
-                    onChange={e => setWebsite(e.target.value)}
-                    tabIndex={-1}
-                    autoComplete="off"
-                  />
-                </div>
-
-                {TURNSTILE_SITE_KEY ? (
-                  <div>
-                    <Turnstile
-                      siteKey={TURNSTILE_SITE_KEY}
-                      onVerify={setCaptchaToken}
-                      resetKey={captchaNonce}
-                    />
-                  </div>
-                ) : null}
-
-                <button
-                  type="submit"
-                  disabled={sending}
-                  className="btn-amber flex items-center gap-2 w-full justify-center"
-                  style={{ opacity: sending ? 0.7 : 1, cursor: sending ? 'wait' : 'pointer' }}
-                >
-                  {sending ? 'Sending…' : <>Submit Request <ArrowRight size={16} /></>}
-                </button>
-              </form>
-              </>
-            )}
+            <ServiceRequestForm idPrefix="contact" />
           </div>
 
           {/* Contact info sidebar */}
@@ -376,7 +45,19 @@ export default function ContactSection() {
               </h3>
               <div className="space-y-4">
                 <a
-                  href="mailto:support@clearmedimaging.com"
+                  href={`tel:${COMPANY.phoneIntl}`}
+                  className="flex items-center gap-3"
+                >
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(0,159,193,0.2)' }}>
+                    <Phone size={16} style={{ color: '#009fc1' }} />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', fontFamily: 'Montserrat, sans-serif', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Phone</p>
+                    <p style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 600, fontFamily: 'Montserrat, sans-serif' }}>{COMPANY.phone}</p>
+                  </div>
+                </a>
+                <a
+                  href={`mailto:${COMPANY.email}`}
                   className="flex items-center gap-3"
                 >
                   <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: 'rgba(0,159,193,0.2)' }}>
@@ -384,7 +65,7 @@ export default function ContactSection() {
                   </div>
                   <div>
                     <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', fontFamily: 'Montserrat, sans-serif', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Email</p>
-                    <p style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 600, fontFamily: 'Montserrat, sans-serif' }}>support@clearmedimaging.com</p>
+                    <p style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 600, fontFamily: 'Montserrat, sans-serif' }}>{COMPANY.email}</p>
                   </div>
                 </a>
                 <div className="flex items-start gap-3">
@@ -394,7 +75,7 @@ export default function ContactSection() {
                   <div>
                     <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', fontFamily: 'Montserrat, sans-serif', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Address</p>
                     <p style={{ fontSize: '0.875rem', color: '#fff', fontFamily: 'Montserrat, sans-serif', lineHeight: '1.5' }}>
-                      1005 Evenflow Dr.<br />Ball Ground, GA 30107
+                      {COMPANY.address.street}<br />{COMPANY.address.city}, {COMPANY.address.region} {COMPANY.address.postalCode}
                     </p>
                   </div>
                 </div>
@@ -407,6 +88,10 @@ export default function ContactSection() {
                     <p style={{ fontSize: '0.875rem', color: '#fff', fontFamily: 'Montserrat, sans-serif' }}>We respond within 1 business day</p>
                   </div>
                 </div>
+                <div style={{ paddingTop: '0.25rem' }}>
+                  <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', fontFamily: 'Montserrat, sans-serif', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Follow Us</p>
+                  <SocialLinks />
+                </div>
               </div>
             </div>
 
@@ -414,17 +99,22 @@ export default function ContactSection() {
               className="rounded-2xl p-6 text-center"
               style={{ background: '#f0f9ff', border: '1px solid #bae6fd' }}
             >
-              <h4
+              <h3
                 className="mb-2"
                 style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: '0.95rem', color: '#012854' }}
               >
                 Free Consultation
-              </h4>
+              </h3>
               <p style={{ fontSize: '0.85rem', color: '#475569', lineHeight: '1.6', marginBottom: '16px' }}>
                 Schedule a no-obligation consultation with one of our imaging specialists.
               </p>
+              {/* The form is right here, so jump into it rather than opening the dialog. */}
               <button
-                onClick={() => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => {
+                  const el = document.getElementById('contact-firstName')
+                  el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                  el?.focus({ preventScroll: true })
+                }}
                 className="btn-sky w-full"
                 style={{ fontSize: '0.85rem', padding: '0.65rem 1rem' }}
               >

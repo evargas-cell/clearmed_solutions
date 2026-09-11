@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { CheckCircle2 } from 'lucide-react'
+import { useQuoteModal } from './quoteModalContext'
 
 const PANELS = [
   {
@@ -72,7 +73,8 @@ const PANELS = [
 const MIN_SEEK_DELTA = 0.004
 
 export default function SolutionsHub() {
-  const sectionRef = useRef<HTMLDivElement>(null)
+  const quote = useQuoteModal()
+  const sectionRef = useRef<HTMLElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const rafRef = useRef<number>(0)
   const lastProgressRef = useRef<number>(-1)
@@ -131,7 +133,7 @@ export default function SolutionsHub() {
 
   return (
     // 400vh gives 300vh of scroll travel — more px-per-second = gentler seek rate
-    <div
+    <section
       id="about"
       ref={sectionRef}
       style={{ height: '400vh', position: 'relative' }}
@@ -162,7 +164,10 @@ export default function SolutionsHub() {
 
             {/* Section label — left-aligned */}
             <div style={{ marginBottom: '1.75rem' }}>
+              {/* Pill is visual only; the h2 carries the full phrase for
+                  screen readers and crawlers. */}
               <span
+                aria-hidden="true"
                 style={{
                   display: 'inline-block',
                   background: 'rgba(0,159,193,0.12)',
@@ -189,7 +194,7 @@ export default function SolutionsHub() {
                   lineHeight: 1.1,
                 }}
               >
-                Made Simple
+                <span className="sr-only">Your Medical Imaging, </span>Made Simple
               </h2>
             </div>
 
@@ -346,13 +351,7 @@ export default function SolutionsHub() {
                     ))}
                   </ul>
 
-                  <button
-                    onClick={() => {
-                      const el = document.querySelector('#contact')
-                      if (el) el.scrollIntoView({ behavior: 'smooth' })
-                    }}
-                    className="btn-amber"
-                  >
+                  <button onClick={quote.open} className="btn-amber">
                     Get a Quote
                   </button>
                 </div>
@@ -372,6 +371,7 @@ export default function SolutionsHub() {
               }}
             >
               <video
+                aria-hidden="true"
                 ref={videoRef}
                 src="/images/Siemens_CT_motion.mp4"
                 muted
@@ -478,6 +478,6 @@ export default function SolutionsHub() {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   )
 }

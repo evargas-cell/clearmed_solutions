@@ -111,7 +111,9 @@ export default function ServicesGrid() {
               <div
                 key={card.id}
                 id={card.id}
+                className="reveal"
                 style={{
+                  scrollMarginTop: '96px', // clear the fixed navbar when linked to
                   background: card.bg,
                   borderRadius: '16px',
                   padding: '1.75rem',
@@ -149,22 +151,8 @@ export default function ServicesGrid() {
                   <Icon size={22} style={{ color: card.color }} />
                 </div>
 
-                {/* Brand label */}
-                <p
-                  style={{
-                    fontFamily: 'Montserrat, sans-serif',
-                    fontWeight: 700,
-                    fontSize: '0.65rem',
-                    letterSpacing: '0.1em',
-                    textTransform: 'uppercase',
-                    color: card.color,
-                    marginBottom: '0.35rem',
-                    opacity: 0.75,
-                  }}
-                >
-                  {card.brand}
-                </p>
-
+                {/* The h3 names the whole service ("Siemens CT Service"); the
+                    brand line is a block span styled exactly like the old label. */}
                 <h3
                   style={{
                     fontFamily: 'Montserrat, sans-serif',
@@ -175,6 +163,22 @@ export default function ServicesGrid() {
                     lineHeight: 1.25,
                   }}
                 >
+                  <span
+                    style={{
+                      display: 'block',
+                      fontFamily: 'Montserrat, sans-serif',
+                      fontWeight: 700,
+                      fontSize: '0.65rem',
+                      letterSpacing: '0.1em',
+                      lineHeight: 1.5,
+                      textTransform: 'uppercase',
+                      color: card.color,
+                      marginBottom: '0.35rem',
+                      opacity: 0.75,
+                    }}
+                  >
+                    {card.brand}
+                  </span>{' '}
                   {card.title}
                 </h3>
 
@@ -190,14 +194,12 @@ export default function ServicesGrid() {
                   {card.desc}
                 </p>
 
-                <button
-                  onClick={() => {
-                    const el = document.querySelector('#about')
-                    if (el) el.scrollIntoView({ behavior: 'smooth' })
-                  }}
+                <a
+                  href="#about"
+                  aria-label={`Learn more about ${card.brand} ${card.title}`}
                   style={{
-                    background: 'transparent',
-                    border: 'none',
+                    width: 'fit-content',
+                    textDecoration: 'none',
                     cursor: 'pointer',
                     fontFamily: 'Montserrat, sans-serif',
                     fontWeight: 700,
@@ -219,7 +221,7 @@ export default function ServicesGrid() {
                   }}
                 >
                   Learn More →
-                </button>
+                </a>
               </div>
             )
           })}

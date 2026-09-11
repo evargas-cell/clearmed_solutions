@@ -135,6 +135,118 @@ a:focus-visible {
   border-radius: 6px;
 }
 
+/* ── Social profile links (footer, contact card — navy backgrounds) ── */
+.social-links {
+  display: flex;
+  gap: 0.6rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.social-link:hover {
+  background: #009fc1;
+  color: #fff;
+  transform: translateY(-2px);
+}
+.social-link:active {
+  transform: translateY(0);
+}
+.social-link:focus-visible {
+  outline: 2px solid #009fc1;
+  outline-offset: 3px;
+  border-radius: 9999px; /* keep the ring round (global a:focus-visible sets 6px) */
+}
+
+/* ── Quote dialog ── */
+.quote-dialog {
+  /* Tailwind's preflight zeroes margins on every element, which kills the
+     browser's default `margin: auto` that centres a modal <dialog>. */
+  margin: auto;
+  border: none;
+  padding: 0;
+  border-radius: 20px;
+  width: min(680px, calc(100vw - 2rem));
+  max-height: min(88vh, 920px);
+  background: #fff;
+  color: #1e293b;
+  box-shadow: 0 8px 24px rgba(1, 40, 84, 0.16), 0 24px 64px rgba(1, 40, 84, 0.28);
+}
+.quote-dialog::backdrop {
+  background: rgba(1, 28, 64, 0.72);
+  backdrop-filter: blur(4px);
+}
+.quote-dialog[open] {
+  animation: quoteDialogIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.quote-dialog[open]::backdrop {
+  animation: fadeIn 0.28s ease both;
+}
+@keyframes quoteDialogIn {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+.quote-dialog-inner {
+  position: relative;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+}
+.quote-dialog-close {
+  position: absolute;
+  top: clamp(1rem, 2vw, 1.5rem);
+  right: clamp(1rem, 2vw, 1.5rem);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 9999px;
+  background: rgba(1, 40, 84, 0.06);
+  color: #012854;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.quote-dialog-close:hover {
+  background: rgba(0, 159, 193, 0.14);
+  color: #009fc1;
+}
+.quote-dialog-close:focus-visible {
+  outline: 2px solid #009fc1;
+  outline-offset: 3px;
+}
+
+/* Bottom sheet on phones — thumb-reachable, full width. */
+@media (max-width: 640px) {
+  .quote-dialog {
+    width: 100%;
+    max-width: 100%;
+    margin: auto auto 0;
+    border-radius: 20px 20px 0 0;
+    max-height: 92vh;
+  }
+  @keyframes quoteDialogIn {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: none; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quote-dialog[open],
+  .quote-dialog[open]::backdrop {
+    animation: none;
+  }
+}
+
 /* ── Card depth layers ── */
 /* base: resting elevation */
 .card-base {

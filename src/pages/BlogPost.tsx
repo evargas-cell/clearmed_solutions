@@ -4,8 +4,11 @@ import { getPostBySlug, BLOG_POSTS } from '../data/blogPosts'
 import SEOHead from '../components/SEOHead'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import { blogPostPage } from '../seo/pages'
+import { useQuoteModal } from '../components/quoteModalContext'
 
 export default function BlogPost() {
+  const quote = useQuoteModal()
   const { slug } = useParams<{ slug: string }>()
   const post = getPostBySlug(slug ?? '')
 
@@ -15,16 +18,13 @@ export default function BlogPost() {
 
   return (
     <div style={{ width: '100%', minHeight: '100vh', background: '#f8fafc' }}>
-      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50 }}>
+      <header style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50 }}>
         <Navbar />
-      </div>
+      </header>
 
-      <SEOHead
-        title={`${post.title} | ClearMed Imaging Solutions`}
-        description={post.excerpt.slice(0, 155)}
-        path={`/blog/${post.slug}`}
-      />
+      <SEOHead {...blogPostPage(post)} />
       <main style={{ paddingTop: '72px' }}>
+        <article>
         {/* Hero */}
         <div style={{ background: '#012854', padding: '3.5rem 1.5rem 4rem' }}>
           <div className="max-w-3xl mx-auto">
@@ -240,7 +240,7 @@ export default function BlogPost() {
                 textAlign: 'center',
               }}
             >
-              <h3
+              <h2
                 style={{
                   fontFamily: 'Montserrat, sans-serif',
                   fontWeight: 800,
@@ -250,7 +250,7 @@ export default function BlogPost() {
                 }}
               >
                 Questions about your facility's imaging equipment?
-              </h3>
+              </h2>
               <p
                 style={{
                   fontFamily: 'Open Sans, sans-serif',
@@ -259,22 +259,28 @@ export default function BlogPost() {
                   marginBottom: '1.25rem',
                 }}
               >
-                ClearMed Imaging Solutions provides free consultations for facilities across the Southeast.
+                ClearMed Imaging Solutions provides free consultations for facilities nationwide.
               </p>
-              <Link to="/#contact" style={{ textDecoration: 'none' }}>
-                <button className="btn-amber">Get a Free Consultation</button>
-              </Link>
+              <a
+                href="/#contact"
+                className="btn-amber"
+                onClick={e => { e.preventDefault(); quote.open() }}
+              >
+                Get a Free Consultation
+              </a>
             </div>
           </div>
         </div>
 
+        </article>
+
         {/* More articles */}
         {otherPosts.length > 0 && (
-          <div
+          <section
             style={{ background: '#fff', padding: '3.5rem 1.5rem', borderTop: '1px solid #f1f5f9' }}
           >
             <div className="max-w-7xl mx-auto">
-              <h3
+              <h2
                 style={{
                   fontFamily: 'Montserrat, sans-serif',
                   fontWeight: 800,
@@ -284,7 +290,7 @@ export default function BlogPost() {
                 }}
               >
                 More from the Resource Library
-              </h3>
+              </h2>
               <div
                 style={{
                   display: 'grid',
@@ -326,7 +332,7 @@ export default function BlogPost() {
                       >
                         {p.category}
                       </span>
-                      <h4
+                      <h3
                         style={{
                           fontFamily: 'Montserrat, sans-serif',
                           fontWeight: 700,
@@ -337,7 +343,7 @@ export default function BlogPost() {
                         }}
                       >
                         {p.title}
-                      </h4>
+                      </h3>
                       <div
                         style={{
                           display: 'flex',
@@ -356,7 +362,7 @@ export default function BlogPost() {
                 ))}
               </div>
             </div>
-          </div>
+          </section>
         )}
       </main>
 
