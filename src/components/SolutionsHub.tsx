@@ -134,7 +134,7 @@ export default function SolutionsHub() {
   return (
     // 400vh gives 300vh of scroll travel — more px-per-second = gentler seek rate
     <section
-      id="about"
+      id="solutions"
       ref={sectionRef}
       style={{ height: '400vh', position: 'relative' }}
     >

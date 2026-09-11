@@ -195,7 +195,7 @@ export default function ServicesGrid() {
                 </p>
 
                 <a
-                  href="#about"
+                  href="#solutions"
                   aria-label={`Learn more about ${card.brand} ${card.title}`}
                   style={{
                     width: 'fit-content',

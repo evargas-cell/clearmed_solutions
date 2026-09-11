@@ -34,8 +34,10 @@ const FEATURES = [
 export default function WhyChooseUs() {
   const quote = useQuoteModal()
 
+  // "About" in the nav lands here: the company story, which continues into
+  // Meet the Founders below.
   return (
-    <section style={{ background: '#fff', padding: '5rem 0' }}>
+    <section id="about" style={{ background: '#fff', padding: '5rem 0' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div
             style={{

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useQuoteModal } from './quoteModalContext'
 
 export default function GlowCursor() {
   const dotRef = useRef<HTMLDivElement>(null)
@@ -8,6 +9,7 @@ export default function GlowCursor() {
   const raf = useRef<number>(0)
   const [isPointer, setIsPointer] = useState(false)
   const [visible, setVisible] = useState(false)
+  const { isOpen: quoteOpen } = useQuoteModal()
 
   useEffect(() => {
     // Touch devices keep the native cursor: no listeners, so `visible` stays
@@ -50,6 +52,12 @@ export default function GlowCursor() {
       cancelAnimationFrame(raf.current)
     }
   }, [])
+
+  // A modal <dialog> renders in the browser's top layer, which paints above
+  // every z-index — the dot and glow would sit underneath it while the native
+  // cursor stayed hidden, leaving no pointer at all. Hand the cursor back to
+  // the browser for as long as the dialog is open.
+  if (quoteOpen) return null
 
   const dotSize = isPointer ? 12 : 7
   const glowSize = isPointer ? 80 : 48
