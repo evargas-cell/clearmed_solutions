@@ -1,4 +1,5 @@
 import { BLOG_POSTS, type BlogPost } from '../data/blogPosts'
+import { SERVICES, SERVICES_HUB, servicePath, type ServiceDetail } from '../data/services'
 
 export const SITE_URL = 'https://clearmedimaging.com'
 export const OG_IMAGE = `${SITE_URL}/images/mri-aera-installed.jpg`
@@ -53,5 +54,28 @@ export function blogPostPage(post: BlogPost): PageMeta {
   }
 }
 
+// Service pages carry no publication date; `lastmod` is left off rather than
+// filled with the build date, which would tell crawlers the copy changed on
+// every deploy.
+export const SERVICES_PAGE: PageMeta = {
+  path: SERVICES_HUB.path,
+  title: SERVICES_HUB.title,
+  description: SERVICES_HUB.description,
+}
+
+export function servicePage(service: ServiceDetail): PageMeta {
+  return {
+    path: servicePath(service.slug),
+    title: service.title,
+    description: service.description,
+  }
+}
+
 /** Every indexable route — drives prerendering and the sitemap. */
-export const ALL_PAGES: PageMeta[] = [HOME_PAGE, BLOG_PAGE, ...BLOG_POSTS.map(blogPostPage)]
+export const ALL_PAGES: PageMeta[] = [
+  HOME_PAGE,
+  SERVICES_PAGE,
+  ...SERVICES.map(servicePage),
+  BLOG_PAGE,
+  ...BLOG_POSTS.map(blogPostPage),
+]

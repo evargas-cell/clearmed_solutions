@@ -1,17 +1,14 @@
 import { Mail, MapPin, Phone } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import { COMPANY } from '../data/company'
+import { SERVICES as SERVICE_LIST, servicePath } from '../data/services'
 import SocialLinks from './SocialLinks'
 
-// Homepage section anchors, rendered as "/#id" links so they work — and are
-// crawlable — from every page, not just the homepage.
+// Service pages, plus the homepage equipment section. Items whose href starts
+// with "/#" are section anchors, which work — and stay crawlable — from every
+// page, not just the homepage.
 const SERVICE_LINKS = [
-  { label: 'Siemens CT Service', href: '/#siemens-ct' },
-  { label: 'Siemens MRI Service', href: '/#siemens-mri' },
-  { label: 'GE CT Service', href: '/#ge-ct' },
-  { label: 'GE MRI Service', href: '/#ge-mri' },
-  { label: 'System Installation', href: '/#installation' },
-  { label: 'Preventive Maintenance', href: '/#preventive-maintenance' },
+  ...SERVICE_LIST.map(s => ({ label: s.label, href: servicePath(s.slug) })),
   { label: 'Equipment Sales', href: '/#equipment' },
 ]
 
@@ -131,11 +128,17 @@ export default function Footer() {
           {/* Column 2: Services */}
           <div>
             <h2 style={headingStyle}>Services</h2>
-            {SERVICE_LINKS.map(link => (
-              <a key={link.label} href={link.href} style={linkStyle} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
-                {link.label}
-              </a>
-            ))}
+            {SERVICE_LINKS.map(link =>
+              link.href.startsWith('/#') ? (
+                <a key={link.label} href={link.href} style={linkStyle} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+                  {link.label}
+                </a>
+              ) : (
+                <Link key={link.label} to={link.href} style={linkStyle} onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+                  {link.label}
+                </Link>
+              ),
+            )}
           </div>
 
           {/* Column 3: Resources */}

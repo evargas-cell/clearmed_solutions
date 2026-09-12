@@ -1,10 +1,13 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { Zap, Activity, Scan, Brain } from 'lucide-react'
 import { useInView } from '../hooks/useInView'
+import { servicePath } from '../data/services'
 
 const CARDS = [
   {
     id: 'siemens-ct',
+    slug: 'siemens-ct-service',
     brand: 'Siemens',
     title: 'CT Service',
     color: '#007070',
@@ -15,6 +18,7 @@ const CARDS = [
   },
   {
     id: 'siemens-mri',
+    slug: 'siemens-mri-service',
     brand: 'Siemens',
     title: 'MRI Service',
     color: '#007070',
@@ -25,6 +29,7 @@ const CARDS = [
   },
   {
     id: 'ge-ct',
+    slug: 'ge-ct-service',
     brand: 'GE',
     title: 'CT Service',
     color: '#003087',
@@ -35,6 +40,7 @@ const CARDS = [
   },
   {
     id: 'ge-mri',
+    slug: 'ge-mri-service',
     brand: 'GE',
     title: 'MRI Service',
     color: '#003087',
@@ -194,8 +200,8 @@ export default function ServicesGrid() {
                   {card.desc}
                 </p>
 
-                <a
-                  href="#solutions"
+                <Link
+                  to={servicePath(card.slug)}
                   aria-label={`Learn more about ${card.brand} ${card.title}`}
                   style={{
                     width: 'fit-content',
@@ -221,7 +227,7 @@ export default function ServicesGrid() {
                   }}
                 >
                   Learn More →
-                </a>
+                </Link>
               </div>
             )
           })}

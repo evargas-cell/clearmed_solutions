@@ -5,6 +5,9 @@ const xmlEscape = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>
 
 function sitemapHints(path) {
   if (path === '/') return { changefreq: 'monthly', priority: '1.0' }
+  if (path === '/services') return { changefreq: 'monthly', priority: '0.9' }
+  // Service pages are the commercial landing pages, so they outrank articles.
+  if (path.startsWith('/services/')) return { changefreq: 'monthly', priority: '0.8' }
   if (path === '/blog') return { changefreq: 'weekly', priority: '0.8' }
   return { changefreq: 'monthly', priority: '0.7' }
 }
@@ -34,6 +37,7 @@ export function buildLlmsTxt(pages, siteUrl, company) {
 > Independent service organization with OEM-certified engineers for Siemens and GE CT and MRI imaging systems. Preventive maintenance, emergency repair, installation and deinstallation, system relocation, and parts for hospitals and imaging centers nationwide, with a primary focus on the Southeast US.
 
 ## Services
+Each service has its own page, linked under "Pages" below: ${siteUrl}/services
 - Siemens CT service and repair: SOMATOM Definition Flash, Force, Definition AS+, Perspective, go.Now, go.Up
 - Siemens MRI service and repair: MAGNETOM Aera, Espree, Vida, Sola, Lumina, Skyra
 - GE CT service and repair: Revolution EVO, Revolution HD, Discovery CT750 HD, Optima CT660, LightSpeed VCT

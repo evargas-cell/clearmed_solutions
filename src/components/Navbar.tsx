@@ -3,15 +3,14 @@ import { Menu, X, ChevronDown } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import LogoSVG from './LogoSVG'
 import { useQuoteModal } from './quoteModalContext'
+import { SERVICES as SERVICE_LIST, servicePath } from '../data/services'
 
-// Homepage section anchors, rendered as "/#id" links: a same-page jump on the
-// homepage (smoothed by html { scroll-behavior }), a normal link elsewhere, and
-// crawlable either way.
+// The Services menu points at the real /services pages. Items whose href
+// starts with "/#" are homepage section anchors instead: a same-page jump on
+// the homepage, a normal link elsewhere, and crawlable either way.
 const SERVICES = [
-  { label: 'Siemens CT Service', href: '/#siemens-ct' },
-  { label: 'Siemens MRI Service', href: '/#siemens-mri' },
-  { label: 'GE CT Service', href: '/#ge-ct' },
-  { label: 'GE MRI Service', href: '/#ge-mri' },
+  ...SERVICE_LIST.map(s => ({ label: s.label, href: servicePath(s.slug) })),
+  { label: 'All Services', href: '/services' },
 ]
 
 const EQUIPMENT = [
@@ -273,11 +272,17 @@ export default function Navbar() {
                       '0 4px 16px rgba(1,40,84,0.1), 0 16px 40px rgba(1,40,84,0.08)',
                   }}
                 >
-                  {SERVICES.map(s => (
-                    <a key={s.label} href={s.href} className="nav-dropdown-item" onClick={closeMenus}>
-                      {s.label}
-                    </a>
-                  ))}
+                  {SERVICES.map(s =>
+                    s.href.startsWith('/#') ? (
+                      <a key={s.label} href={s.href} className="nav-dropdown-item" onClick={closeMenus}>
+                        {s.label}
+                      </a>
+                    ) : (
+                      <Link key={s.label} to={s.href} className="nav-dropdown-item" onClick={closeMenus}>
+                        {s.label}
+                      </Link>
+                    ),
+                  )}
                 </div>
               </div>
 
@@ -389,7 +394,9 @@ export default function Navbar() {
           id="nav-mobile-menu"
           inert={!mobileOpen}
           style={{
-            maxHeight: mobileOpen ? '520px' : '0',
+            // Tall enough for every item; the Services menu adds one row per
+            // service page, so this has to clear the full list.
+            maxHeight: mobileOpen ? '680px' : '0',
             overflow: 'hidden',
             transition: 'max-height 0.35s cubic-bezier(0.16,1,0.3,1)',
           }}

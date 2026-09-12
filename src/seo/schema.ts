@@ -1,4 +1,5 @@
 import { COMPANY } from '../data/company'
+import { SERVICES, SERVICES_HUB, getServiceBySlug, servicePath, type ServiceDetail } from '../data/services'
 import { HOME_PAGE, OG_IMAGE, SITE_URL } from './pages'
 
 // JSON-LD structured data, injected into the prerendered <head> by
@@ -11,42 +12,85 @@ const AREA_SERVED = [
   { '@type': 'Place', name: COMPANY.areaServed.primaryRegion },
 ]
 
-// `anchor` is the on-page section that describes each service.
-const SERVICES = [
-  {
-    key: 'ct-service',
-    name: 'CT Scanner Service & Repair',
-    serviceType: 'CT scanner service and repair',
-    anchor: '#services',
-    description: 'Preventive maintenance, corrective and emergency repair, X-ray tube replacement, and detector calibration for Siemens SOMATOM and GE Revolution, Discovery, Optima, and LightSpeed CT systems.',
-  },
-  {
-    key: 'mri-service',
-    name: 'MRI Service & Repair',
-    serviceType: 'MRI service and repair',
-    anchor: '#services',
-    description: 'Preventive maintenance, emergency fault resolution, and magnet and cryogen (helium) management for Siemens MAGNETOM and GE SIGNA and Optima MRI systems.',
-  },
-  {
-    key: 'installation',
-    name: 'CT & MRI Installation and Deinstallation',
-    serviceType: 'Medical imaging equipment installation and deinstallation',
-    anchor: '#installation',
-    description: 'Site planning, RF shielding inspection and site preparation, rigging, installation, and commissioning with ACR/AAPM acceptance, plus full system deinstallation and relocation for Siemens and GE CT and MRI systems.',
-  },
-  {
-    key: 'preventive-maintenance',
-    name: 'Preventive Maintenance for Siemens & GE CT and MRI',
-    serviceType: 'Preventive maintenance for CT and MRI systems',
-    anchor: '#preventive-maintenance',
-    description: 'Scheduled preventive maintenance to OEM specifications for Siemens and GE CT and MRI systems, with planned maintenance programs and full-service or time-and-materials contracts.',
-  },
-]
+const abs = (path: string) => `${SITE_URL}${path}`
+/** Each service's canonical node lives on its own page. */
+const serviceId = (slug: string) => `${abs(servicePath(slug))}#service`
 
-const serviceId = (key: string) => `${SITE_URL}/#${key}-schema`
+/**
+ * The business. The homepage carries the full record; other pages carry a
+ * short form under the same @id so each page stands on its own without
+ * repeating the address block nine times.
+ */
+function businessNode(full: boolean) {
+  const { address } = COMPANY
+  const short = {
+    // LocalBusiness rather than MedicalBusiness: schema.org defines the
+    // latter as a provider of medical care; ClearMed services equipment.
+    '@type': 'LocalBusiness',
+    '@id': BUSINESS_ID,
+    name: COMPANY.name,
+    url: `${SITE_URL}/`,
+    logo: `${SITE_URL}/images/logo.svg`,
+    telephone: COMPANY.phoneIntl,
+    email: COMPANY.email,
+  }
+  if (!full) return short
+  return {
+    ...short,
+    image: OG_IMAGE,
+    description: HOME_PAGE.description,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: address.street,
+      addressLocality: address.city,
+      addressRegion: address.region,
+      postalCode: address.postalCode,
+      addressCountry: address.country,
+    },
+    areaServed: AREA_SERVED,
+    founder: [
+      { '@type': 'Person', name: 'Eyad Albakri' },
+      { '@type': 'Person', name: 'Ankur Patel' },
+    ],
+    sameAs: [COMPANY.social.facebook, COMPANY.social.linkedin],
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: 'CT and MRI imaging equipment services',
+      itemListElement: SERVICES.map(s => ({
+        '@type': 'Offer',
+        itemOffered: { '@id': serviceId(s.slug) },
+      })),
+    },
+  }
+}
+
+function serviceNode(service: ServiceDetail) {
+  return {
+    '@type': 'Service',
+    '@id': serviceId(service.slug),
+    name: service.h1,
+    serviceType: service.serviceType,
+    description: service.description,
+    url: abs(servicePath(service.slug)),
+    provider: { '@id': BUSINESS_ID },
+    areaServed: AREA_SERVED,
+  }
+}
+
+/** Mirrors the visible <Breadcrumbs> trail on the page. */
+function breadcrumbs(trail: { name: string; path: string }[]) {
+  return {
+    '@type': 'BreadcrumbList',
+    itemListElement: trail.map((crumb, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: crumb.name,
+      item: abs(crumb.path),
+    })),
+  }
+}
 
 function homeJsonLd() {
-  const { address } = COMPANY
   return {
     '@context': 'https://schema.org',
     '@graph': [
@@ -57,53 +101,66 @@ function homeJsonLd() {
         name: COMPANY.name,
         publisher: { '@id': BUSINESS_ID },
       },
-      {
-        // LocalBusiness rather than MedicalBusiness: schema.org defines the
-        // latter as a provider of medical care; ClearMed services equipment.
-        '@type': 'LocalBusiness',
-        '@id': BUSINESS_ID,
-        name: COMPANY.name,
-        url: `${SITE_URL}/`,
-        logo: `${SITE_URL}/images/logo.svg`,
-        image: OG_IMAGE,
-        description: HOME_PAGE.description,
-        telephone: COMPANY.phoneIntl,
-        email: COMPANY.email,
-        address: {
-          '@type': 'PostalAddress',
-          streetAddress: address.street,
-          addressLocality: address.city,
-          addressRegion: address.region,
-          postalCode: address.postalCode,
-          addressCountry: address.country,
-        },
-        areaServed: AREA_SERVED,
-        founder: [
-          { '@type': 'Person', name: 'Eyad Albakri' },
-          { '@type': 'Person', name: 'Ankur Patel' },
-        ],
-        sameAs: [COMPANY.social.facebook, COMPANY.social.linkedin],
-        hasOfferCatalog: {
-          '@type': 'OfferCatalog',
-          name: 'CT and MRI imaging equipment services',
-          itemListElement: SERVICES.map(s => ({ '@type': 'Offer', itemOffered: { '@id': serviceId(s.key) } })),
-        },
-      },
-      ...SERVICES.map(s => ({
-        '@type': 'Service',
-        '@id': serviceId(s.key),
-        name: s.name,
-        serviceType: s.serviceType,
-        description: s.description,
-        url: `${SITE_URL}/${s.anchor}`,
-        provider: { '@id': BUSINESS_ID },
-        areaServed: AREA_SERVED,
-      })),
+      businessNode(true),
+      ...SERVICES.map(serviceNode),
     ],
   }
 }
 
-/** JSON-LD documents for a route (currently only the homepage has any). */
+function servicesHubJsonLd() {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      breadcrumbs([
+        { name: 'Home', path: '/' },
+        { name: 'Services', path: SERVICES_HUB.path },
+      ]),
+      businessNode(false),
+      {
+        '@type': 'CollectionPage',
+        '@id': `${abs(SERVICES_HUB.path)}#page`,
+        url: abs(SERVICES_HUB.path),
+        name: SERVICES_HUB.title,
+        description: SERVICES_HUB.description,
+        about: { '@id': BUSINESS_ID },
+        mainEntity: {
+          '@type': 'ItemList',
+          itemListElement: SERVICES.map((s, i) => ({
+            '@type': 'ListItem',
+            position: i + 1,
+            name: s.h1,
+            url: abs(servicePath(s.slug)),
+          })),
+        },
+      },
+    ],
+  }
+}
+
+function serviceJsonLd(service: ServiceDetail) {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      breadcrumbs([
+        { name: 'Home', path: '/' },
+        { name: 'Services', path: SERVICES_HUB.path },
+        { name: service.label, path: servicePath(service.slug) },
+      ]),
+      businessNode(false),
+      serviceNode(service),
+    ],
+  }
+}
+
+/** JSON-LD documents for a route. Routes with none return an empty list. */
 export function jsonLdFor(path: string): object[] {
-  return path === '/' ? [homeJsonLd()] : []
+  if (path === '/') return [homeJsonLd()]
+  if (path === SERVICES_HUB.path) return [servicesHubJsonLd()]
+
+  const match = /^\/services\/([\w-]+)$/.exec(path)
+  if (match) {
+    const service = getServiceBySlug(match[1])
+    if (service) return [serviceJsonLd(service)]
+  }
+  return []
 }

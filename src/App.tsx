@@ -3,6 +3,8 @@ import { Routes, Route, useLocation } from 'react-router-dom'
 import Home from './pages/Home'
 import BlogListing from './pages/BlogListing'
 import BlogPost from './pages/BlogPost'
+import ServicesHub from './pages/ServicesHub'
+import ServicePage from './pages/ServicePage'
 import GlowCursor from './components/GlowCursor'
 import QuoteModalProvider from './components/QuoteModalProvider'
 
@@ -41,6 +43,8 @@ function App() {
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/services" element={<ServicesHub />} />
+        <Route path="/services/:slug" element={<ServicePage />} />
         <Route path="/blog" element={<BlogListing />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="*" element={<Home />} />
